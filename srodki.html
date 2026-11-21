@@ -97,9 +97,9 @@ pre.msg{white-space:pre-wrap;word-break:break-word;font-family:var(--f-body);fon
     <label class="f">Uwagi (opcjonalnie)<textarea id="orderNote" placeholder="np. potrzebne na jutro rano"></textarea></label>
     <pre class="msg" id="orderMsg"></pre>
     <div class="actions">
-      <a class="btn primary" id="orderWa" href="https://wa.me/" target="_blank" rel="noopener">Wyślij zamówienie na WhatsApp</a>
+      <a class="btn primary" id="orderWa" href="https://wa.me/" target="_blank" rel="noopener">Wyślij zamówienie na grupę WhatsApp</a>
       <button class="btn" id="orderIssue" type="button">Wydane z magazynku (odejmij ze stanu)</button>
-      <p class="hint">Wyślij do pana Sylwestra albo do grupy. Gdy towar zostanie wydany, kliknij „Wydane”, żeby stan magazynku się zmniejszył.</p>
+      <p class="hint">WhatsApp otworzy listę czatów: wybierz grupę „Nowy Rektorat – Zespół porządkowy”. Osoba prowadząca magazynek: gdy zobaczysz zamówienie w grupie, wybierz to piętro, zaznacz te same ilości i kliknij „Wydane”.</p>
     </div>
   </section>
 
@@ -175,12 +175,13 @@ function renderOrder(){
   $("orderIssue").disabled=!any; $("orderWa").style.opacity=any?1:.5;
 }
 function orderText(){
-  const L=["🧴 *ZAMÓWIENIE ŚRODKÓW CZYSTOŚCI*", "🏢 A33 · 📅 "+nowStr(), "👤 "+whoName($("who").value||st.who||"e"), ""];
+  const k=$("who").value||st.who||"e", a=AREAS.find(x=>x.k===k), name=(team[k]&&team[k].name)||"";
+  const L=["🧴 *Zamówienie – "+a.label+"*", "Panie Sylwestrze, proszę o:"];
   const items=PRODUCTS.filter(p=>order[p.id]);
   if(!items.length) L.push("_(wybierz produkty)_");
   items.forEach(p=>L.push("• "+p.name+" – "+q(p,order[p.id])));
   const note=$("orderNote").value.trim(); if(note){ L.push(""); L.push("📝 "+note); }
-  L.push(""); L.push("Proszę o wydanie z magazynku. Dziękuję!");
+  L.push(""); L.push("Dziękuję"+(name?", "+name:"")+"!");
   return L.join("\n");
 }
 
