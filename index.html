@@ -41,7 +41,7 @@
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 96px}
 .wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
-header{padding-block:18px 4px}
+header{padding-block:18px 4px;display:flex;flex-direction:column;align-items:flex-start;gap:6px}
 .eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 h1{font-family:var(--f-head);font-size:30px;line-height:1.1;margin:4px 0 2px;text-wrap:balance}
 h2{font-family:var(--f-head);font-size:20px;margin:0;display:flex;align-items:baseline;gap:8px}
@@ -119,6 +119,7 @@ details.team summary small{color:var(--muted);font-size:13px}details.team[open]{
     <div class="eyebrow">E-KKO · Budynek A33 · Nowy Rektorat</div>
     <h1>Karta Kontroli Obiektu</h1>
     <p class="sub">Obchód, ocena punktów kontroli, zadania z numerem pomieszczenia i zdjęciem, raport na WhatsApp.</p>
+    <button class="btn small" id="newTop" type="button">↻ Nowa kontrola</button>
   </header>
 
   <details class="card team" id="team">
@@ -175,7 +176,7 @@ details.team summary small{color:var(--muted);font-size:13px}details.team[open]{
       <button class="btn danger" id="newBtn">Nowa kontrola</button>
       <div class="confirm" id="confirmBox" hidden>
         <b>Wyczyścić kartę?</b>
-        <span class="hint">Oceny, opisy i zdjęcia ze wszystkich pięter zostaną usunięte. Data zostanie.</span>
+        <span class="hint">Oceny, opisy i zdjęcia ze wszystkich pięter zostaną usunięte. Zespół i podpis zostaną.</span>
         <div class="row"><button class="btn danger" id="confirmYes">Tak, wyczyść</button><button class="btn" id="confirmNo">Anuluj</button></div>
       </div>
     </div>
@@ -193,7 +194,7 @@ details.team summary small{color:var(--muted);font-size:13px}details.team[open]{
       <li>Przy piętrze bez uwag raport dodaje imienne podziękowanie, losowane z kilku wersji. Przycisk „Inne słowa podziękowań” zmienia losowanie.</li>
       <li>W raporcie pojawiają się pozycje OK i do poprawy. „Nie dotyczy” i niesprawdzone są pomijane.</li>
       <li>Karta nie wysyła niczego sama. Przygotowuje wiadomość, a Ty wybierasz grupę w WhatsApp.</li>
-      <li>Każde otwarcie aplikacji zaczyna nową, pustą kontrolę (dzisiejsza data). Zespół i podpis zostają. Zdjęcia znikają po zamknięciu aplikacji.</li>
+      <li>Nowa, pusta kontrola zaczyna się sama po wysłaniu raportu (gdy wrócisz po 2 minutach), po 15 minutach bez używania albo następnego dnia. Przycisk „↻ Nowa kontrola” na górze czyści kartę od razu. Zespół i podpis zostają.</li>
     </ul>
   </details>
 </div>
@@ -259,7 +260,7 @@ function blank(floor){ return {date:todayISO(), due:"12:00", floor, floors:{}, m
 function cur(){ const f=state.floors[state.floor]; if(f && f.points.length===pointsFor(state.floor).length) return f; return (state.floors[state.floor]=blankFloor(state.floor)); }
 function floorStarted(fid){ const f=state.floors[fid]; return !!(f && f.points.some(p=>p.s)); }
 function load(){ try{ const raw=localStorage.getItem("ekko-a33-v2"); if(raw){ const s=JSON.parse(raw); if(s && s.floors){ state=s; Object.values(s.floors).forEach(f=>f.points.forEach(p=>p.entries.forEach(e=>{ uid=Math.max(uid,(e.id||0)+1); }))); } } }catch(e){} }
-function save(){ try{ localStorage.setItem("ekko-a33-v2", JSON.stringify(state)); }catch(e){} }
+function save(){ state.lastActive=Date.now(); try{ localStorage.setItem("ekko-a33-v2", JSON.stringify(state)); }catch(e){} }
 
 function roomsFor(fid){ if(fid==="x") return OUTSIDE_PLACES; return (ROOMS[fid]||[]).map(([c,n])=>[c, ROOM_FIX[c]||n]); }
 const OUTSIDE_PLACES=[["@wejscie","Wejście główne (na zewnątrz)"],["@tyl","Tył budynku"],["@wjazd","Wjazd do garażu"],["@chodnik","Chodniki wokół budynku"]];
@@ -562,6 +563,7 @@ function renderReport(){
 }
 
 async function share(){
+  markSent();
   const txt=buildReport(); const files=[]; for(const it of photoItems()){ const b=await stamp(it); files.push(new File([b], stampName(it), {type:"image/jpeg"})); }
   try{ await navigator.share({text:txt, files}); toast("Przekazano do udostępnienia"); }
   catch(err){ if(err && err.name==="AbortError") return; toast("Udostępnianie zablokowane. Użyj przycisku z tekstem."); $("shareBtn").hidden=true; }
@@ -589,19 +591,30 @@ $("saveBtn").onclick=savePhotos;
 $("thanksOn").onchange=e=>{ state.thanks=e.target.checked; save(); renderReport(); };
 $("thanksNew").onclick=()=>{ state.thanksSeed=(state.thanksSeed||0)+1; save(); renderReport(); toast("Wylosowano inne podziękowania"); };
 document.querySelectorAll("#mode button").forEach(b=>b.onclick=()=>{ state.mode=b.dataset.m; save(); renderReport(); });
-$("copyBtn").onclick=copy;
+$("copyBtn").onclick=()=>{ copy(); markSent(); };
+$("waLink").addEventListener("click", markSent);
+$("newTop").onclick=()=>{ $("confirmBox").hidden=false; $("confirmBox").scrollIntoView({behavior:"smooth", block:"center"}); };
 $("newBtn").onclick=()=>{ $("confirmBox").hidden=false; };
 $("confirmNo").onclick=()=>{ $("confirmBox").hidden=true; };
-$("confirmYes").onclick=()=>{ Object.values(photos).flat().forEach(p=>URL.revokeObjectURL(p.url)); for(const k in photos) delete photos[k];
-  state.example=false; const keep={date:state.date, due:state.due, floor:state.floor, mode:state.mode, signName:state.signName, thanks:state.thanks}; state=blank(keep.floor); state.date=keep.date; state.due=keep.due; state.mode=keep.mode||"all"; if(keep.signName!==undefined) state.signName=keep.signName; state.thanks=keep.thanks!==false; save(); $("confirmBox").hidden=true; renderAll(); scrollTo({top:0}); toast("Nowa kontrola gotowa"); };
+$("confirmYes").onclick=()=>{ resetControl(); $("confirmBox").hidden=true; renderAll(); scrollTo({top:0}); toast("Nowa kontrola gotowa"); };
 
 load();
-// Każde otwarcie aplikacji = nowa, pusta kontrola. Zespół, podpis i ustawienia zostają.
-// sessionStorage przeżywa przeładowanie strony w trakcie obchodu (np. po zrobieniu zdjęcia aparatem),
-// ale znika po zamknięciu aplikacji, więc wtedy zaczynamy od nowa.
-(function(){ let fresh=true; try{ fresh=!sessionStorage.getItem("ekko-open"); sessionStorage.setItem("ekko-open","1"); }catch(e){}
-  if(fresh){ const keep={due:state.due||"12:00", mode:state.mode||"all", signName:state.signName||"", thanks:state.thanks!==false};
-    state=blank("0"); state.due=keep.due; state.mode=keep.mode; state.signName=keep.signName; state.thanks=keep.thanks; save(); } })();
+// Nowa kontrola zaczyna się sama, gdy:
+//  - raport został już wysłany (kliknięto WhatsApp / Udostępnij / Kopiuj) i wracasz po ponad 2 minutach,
+//  - aplikacja była nieużywana dłużej niż 15 minut,
+//  - zmienił się dzień.
+// Krótkie wyjście w trakcie obchodu (aparat, telefon) nie kasuje kontroli.
+const IDLE_MS = 15*60*1000;
+function resetControl(){ for(const k in photos){ (photos[k]||[]).forEach(p=>URL.revokeObjectURL(p.url)); delete photos[k]; }
+  const keep={due:state.due||"12:00", mode:state.mode||"all", signName:state.signName||"", thanks:state.thanks!==false};
+  state=blank("0"); state.due=keep.due; state.mode=keep.mode; state.signName=keep.signName; state.thanks=keep.thanks; save(); }
+function needsFresh(){ const last=state.lastActive||0; if(!last) return true; if(state.sent && Date.now()-last>2*60*1000) return true;
+  if(Date.now()-last>IDLE_MS) return true; const d=new Date(last); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10)!==todayISO(); }
+function markSent(){ state.sent=true; try{ localStorage.setItem("ekko-a33-v2", JSON.stringify(state)); }catch(e){} }
+function touch(){ save(); }
+if(needsFresh()) resetControl();
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden"){ touch(); }
+  else if(needsFresh()){ resetControl(); renderAll(); scrollTo({top:0}); toast("Nowa kontrola"); } });
 Object.keys(state.floors).forEach(fid=>{ if(state.floors[fid].points.length!==pointsFor(fid).length) state.floors[fid]=blankFloor(fid); });
 renderAll(); renderTeam();
 if("serviceWorker" in navigator && location.protocol==="https:"){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
