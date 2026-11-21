@@ -1,0 +1,614 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#18233a">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="E-KKO">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}</style>
+</head>
+<body>
+<title>E-KKO A33</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: jedna kolumna na telefon, karty sekcji jak arkusz kontrolny; kody pomieszczeń pismem technicznym jak na rzutach */
+:root{
+  --bg:#eef1f5; --paper:#ffffff; --ink:#18233a; --muted:#5d6779; --line:#d6dce5;
+  --accent:#1f56b3; --accent-ink:#ffffff; --accent-soft:#e3ebf9;
+  --ok:#1d7a47; --ok-soft:#e1f3e8; --fix:#c2352a; --fix-soft:#fbe7e5; --na:#6a7282; --na-soft:#eceef2;
+  --f-head:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f141d; --paper:#18202d; --ink:#e7ecf4; --muted:#9aa5b8; --line:#2c3748;
+  --accent:#6f9cf0; --accent-ink:#0b1220; --accent-soft:#1d2a44;
+  --ok:#5cc58a; --ok-soft:#163324; --fix:#f07a6e; --fix-soft:#3a1d1b; --na:#a3abba; --na-soft:#252d3a; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f141d; --paper:#18202d; --ink:#e7ecf4; --muted:#9aa5b8; --line:#2c3748;
+  --accent:#6f9cf0; --accent-ink:#0b1220; --accent-soft:#1d2a44;
+  --ok:#5cc58a; --ok-soft:#163324; --fix:#f07a6e; --fix-soft:#3a1d1b; --na:#a3abba; --na-soft:#252d3a; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 96px}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{padding-block:18px 4px}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-head);font-size:30px;line-height:1.1;margin:4px 0 2px;text-wrap:balance}
+h2{font-family:var(--f-head);font-size:20px;margin:0;display:flex;align-items:baseline;gap:8px}
+h2 small{font-family:var(--f-body);font-weight:500;font-size:13px;color:var(--muted)}
+.sub{color:var(--muted);font-size:14px;margin:0}
+section.card,details.card{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:12px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--muted)}
+input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%;min-width:0}
+textarea{min-height:64px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1 1 140px;min-width:0}
+.floors{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.floor{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:10px 6px;font:inherit;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:0}
+.floor span{font-family:var(--f-mono);font-size:12px;color:var(--muted);font-weight:500}
+.floor[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.floor[aria-pressed="true"] span{color:var(--accent-ink);opacity:.85}
+.who{display:flex;align-items:center;gap:12px;background:var(--accent-soft);border-radius:8px;padding:10px 12px}
+.who .ini{width:40px;height:40px;flex:none;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--f-head);font-weight:700}
+.who b{display:block}.who small{color:var(--muted)}
+.progress{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.bar{flex:1;height:6px;background:var(--na-soft);border-radius:3px;overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.items{display:flex;flex-direction:column;gap:0;margin:0 -16px}
+.item{border-top:1px solid var(--line);padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+.item[data-s="fix"]{background:var(--fix-soft)}
+.ititle{display:flex;gap:10px;align-items:baseline}
+.ititle .n{font-family:var(--f-mono);font-size:12px;color:var(--muted);width:20px;flex:none;text-align:right}
+.ititle b{font-weight:600}
+.seg{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:6px;padding-left:30px}
+.seg button{font:inherit;font-size:14px;font-weight:600;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:9px 4px;cursor:pointer}
+.seg.mode{padding-left:0;grid-template-columns:1fr 1fr}
+.seg.mode button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.seg button[data-v="ok"][aria-pressed="true"]{background:var(--ok);border-color:var(--ok);color:#fff}
+.seg button[data-v="fix"][aria-pressed="true"]{background:var(--fix);border-color:var(--fix);color:#fff}
+.seg button[data-v="na"][aria-pressed="true"]{background:var(--na);border-color:var(--na);color:var(--paper)}
+.entries{display:flex;flex-direction:column;gap:10px;padding-left:30px}
+.entry{background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.entry .head{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted);font-weight:600}
+.owner{font-size:13px;color:var(--fix);font-weight:600}
+.ph{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ph img{width:72px;height:72px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
+.thumb{position:relative}
+.thumb button{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:none;background:var(--ink);color:var(--paper);font-size:14px;line-height:24px;cursor:pointer;padding:0}
+.btn{font:inherit;font-weight:600;border-radius:8px;padding:11px 14px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-align:center}
+.btn.primary{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn.accent{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.small{padding:7px 10px;font-size:14px}
+.btn.link{border:none;background:none;color:var(--accent);padding:4px 0}
+.btn.danger{color:var(--fix)}
+.photo-btn{position:relative;overflow:hidden}
+.photo-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+pre.report{white-space:pre-wrap;word-break:break-word;font-family:var(--f-body);font-size:15px;background:var(--bg);border-radius:8px;padding:14px;margin:0;border:1px dashed var(--line)}
+.actions{display:flex;flex-direction:column;gap:8px}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-size:14px;z-index:20}
+.confirm{background:var(--fix-soft);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:10px}
+details.note{font-size:14px;color:var(--muted)}
+details.note summary{cursor:pointer;font-weight:600}
+details.note ul{padding-left:18px;margin:8px 0 0}
+.chk{display:flex;gap:8px;align-items:center;font-size:14px;flex:2 1 220px}.chk input{width:20px;height:20px;flex:none}
+details.team{gap:12px}details.team summary{display:flex;align-items:baseline;gap:8px;cursor:pointer;list-style:none}details.team summary::-webkit-details-marker{display:none}
+details.team summary small{color:var(--muted);font-size:13px}details.team[open]{display:flex;flex-direction:column}
+.teamrows{display:flex;flex-direction:column;gap:14px}.teamrow{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:12px}
+.teamrow b{font-size:14px}
+.mono{font-family:var(--f-mono)}
+@media (prefers-reduced-motion: no-preference){.seg button,.floor{transition:background .12s,border-color .12s}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">E-KKO · Budynek A33 · Nowy Rektorat</div>
+    <h1>Karta Kontroli Obiektu</h1>
+    <p class="sub">Obchód, ocena punktów kontroli, zadania z numerem pomieszczenia i zdjęciem, raport na WhatsApp.</p>
+  </header>
+
+  <details class="card team" id="team">
+    <summary><h2>Zespół i podpis</h2><small id="teamState"></small></summary>
+    <p class="hint">Wpisz raz. Dane zostają tylko w tym telefonie.</p>
+    <div id="teamRows" class="teamrows"></div>
+    <label class="f">Twój podpis pod raportem (np. imię i nazwisko)<input id="signName2" placeholder="Imię i nazwisko"></label>
+    <button class="btn accent" id="teamSave" type="button">Zapisz zespół</button>
+  </details>
+
+  <section class="card" aria-labelledby="h-rejon">
+    <h2 id="h-rejon">Rejon kontroli</h2>
+    <div class="row">
+      <label class="f">Data kontroli<input type="date" id="date"></label>
+      <label class="f">Domyślny termin poprawek<input type="time" id="due" value="12:00"></label>
+    </div>
+    <input type="hidden" id="signName">
+    <div class="floors" id="floors" role="group" aria-label="Kondygnacja"></div>
+    <div class="who" id="who"></div>
+    <label class="f">Zastępstwo (gdy osoba odpowiedzialna jest nieobecna)
+      <select id="sub"></select>
+    </label>
+    <label class="f" id="subOtherWrap" hidden>Imię i nazwisko zastępcy<input id="subOther" placeholder="np. Anna Nowak"></label>
+  </section>
+
+  <section class="card" aria-labelledby="h-punkty">
+    <h2 id="h-punkty">Punkty kontroli <small id="cnt"></small></h2>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <div class="row">
+      <button class="btn small" id="restOk">Pozostałe niesprawdzone → OK</button>
+    </div>
+    <p class="hint" id="exNote" hidden>To jest przykład obchodu (garaż, parter, II piętro). Kliknij „Nowa kontrola” na dole, żeby zacząć własną.</p>
+    <div class="items" id="items"></div>
+  </section>
+
+  <section class="card" aria-labelledby="h-raport">
+    <h2 id="h-raport">Raport do grupy</h2>
+    <div class="seg mode" id="mode" role="group" aria-label="Zakres raportu">
+      <button type="button" data-m="all">Cały budynek</button>
+      <button type="button" data-m="floor">Tylko wybrane piętro</button>
+    </div>
+    <pre class="report" id="report"></pre>
+    <div class="ph" id="allPhotos"></div>
+    <div class="actions">
+      <button class="btn primary" id="shareBtn" hidden>Udostępnij na WhatsApp ze zdjęciami</button>
+      <a class="btn primary" id="waLink" href="https://wa.me/" target="_blank" rel="noopener">1. Wyślij tekst raportu na WhatsApp</a>
+      <button class="btn accent" id="saveBtn" hidden>📷 Zapisz zdjęcia z opisem</button>
+      <button class="btn" id="copyBtn">Kopiuj tekst raportu</button>
+      <div class="row">
+        <label class="chk"><input type="checkbox" id="thanksOn" checked> Podziękowania przy rejonach bez uwag</label>
+        <button class="btn small" id="thanksNew">Inne słowa podziękowań</button>
+      </div>
+      <p class="hint" id="shareHint"></p>
+      <button class="btn danger" id="newBtn">Nowa kontrola</button>
+      <div class="confirm" id="confirmBox" hidden>
+        <b>Wyczyścić kartę?</b>
+        <span class="hint">Oceny, opisy i zdjęcia ze wszystkich pięter zostaną usunięte. Data zostanie.</span>
+        <div class="row"><button class="btn danger" id="confirmYes">Tak, wyczyść</button><button class="btn" id="confirmNo">Anuluj</button></div>
+      </div>
+    </div>
+  </section>
+
+  <details class="note">
+    <summary>Założenia tej wersji (prototyp)</summary>
+    <ul>
+      <li>Numery pomieszczeń pochodzą z rzutów poziomów −1, 0, 1, 2 i 3. Brakujący numer można wpisać ręcznie („Inne / wpisz”).</li>
+      <li>Garaż ma 3 punkty: posadzka hali, przedsionek do wind i windy. Teren zewnętrzny ma kosze, liście, odśnieżanie i porządek wokół budynku. Punkty poza sezonem (np. śnieg jesienią) oznacz „Nie dotyczy”.</li>
+      <li>Każde piętro ma własną kartę. Kropka ● przy piętrze oznacza, że są tam już oceny.</li>
+      <li>Raport „Cały budynek” zbiera wszystkie piętra z ocenami w jedną wiadomość, ze zdjęciami ze wszystkich pięter. „Tylko wybrane piętro” daje pełną listę punktów jednego piętra.</li>
+      <li>Wejście główne (K.054) sprząta osoba z III piętra, windy i teren pracownik gospodarczy. Raport dopisuje te osoby przy zadaniu.</li>
+      <li>Imiona zespołu, podpis i wszystkie kontrole są zapisane tylko w tym telefonie. Strona niczego nigdzie nie wysyła.</li>
+      <li>Przy piętrze bez uwag raport dodaje imienne podziękowanie, losowane z kilku wersji. Przycisk „Inne słowa podziękowań” zmienia losowanie.</li>
+      <li>W raporcie pojawiają się pozycje OK i do poprawy. „Nie dotyczy” i niesprawdzone są pomijane.</li>
+      <li>Karta nie wysyła niczego sama. Przygotowuje wiadomość, a Ty wybierasz grupę w WhatsApp.</li>
+      <li>Wpisy zostają w tym telefonie do kliknięcia „Nowa kontrola”. Zdjęcia znikają po zamknięciu strony.</li>
+    </ul>
+  </details>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const ROOMS = {"-1": [["T.-101", "Pomieszczenie techniczne"], ["G.-102", "Pom. gosp. buforowe"], ["KS.-103", "Przedsionek"], ["KS.-104", "Klatka schodowa"], ["W.-106", "Winda"], ["W.-107", "Winda"], ["W.-108", "Przedsionek wind"], ["KS.-110", "Klatka schodowa"], ["KS.-111", "Przedsionek"], ["HG.-112", "Hala garażowa"]], "0": [["001", "Pom. biurowe"], ["002", "Pom. biurowe"], ["003", "Pom. biurowe"], ["004", "Pom. biurowe"], ["005", "Pom. biurowe"], ["006", "Archiwum"], ["007", "Pom. socjalne"], ["008", "Archiwum"], ["010", "Pom. biurowe"], ["011", "Pom. biurowe"], ["012", "Pom. biurowe"], ["013", "Pom. biurowe"], ["014", "Pom. biurowe"], ["015", "Pom. biurowe"], ["017", "Pom. biurowe"], ["018", "Pom. biurowe"], ["019", "Pom. biurowe"], ["020", "Archiwum"], ["021", "Pom. biurowe"], ["022", "Pom. biurowe"], ["023", "Pom. biurowe"], ["024", "Pom. biurowe"], ["025", "Pom. biurowe"], ["026", "Pom. biurowe"], ["027", "Pom. socjalne"], ["028", "Archiwum"], ["K.029", "Kom. wewnętrzna"], ["K.030", "Kom. wewnętrzna"], ["K.031", "Korytarz"], ["K.032", "Korytarz"], ["K.033", "Przedsionek"], ["K.034", "Przedsionek"], ["KS.035", "Klatka schodowa"], ["W.037", "Winda"], ["W.038", "Winda"], ["KS.040", "Klatka schodowa"], ["041", "Pom. socjalne"], ["Ł.042", "WC"], ["Ł.043", "Prysznic"], ["044", "Pom. socjalne"], ["Ł.045", "WC m."], ["Ł.046", "Umywalnia męska"], ["T.047", "Pom. techniczne"], ["T.048", "Pom. techniczne"], ["Ł.049", "WC dla niepełnospr."], ["Ł.050", "Umywalnia damska"], ["Ł.051", "WC damski"], ["052", "Pom. socjalne"], ["053", "Pom. pomocnicze"], ["K.054", "Komunikacja wejściowa"], ["K.055", "Korytarz"]], "1": [["101", "Gabinet kwestora"], ["102", "Sekretariat kwestury"], ["103", "Pokój kierownika"], ["104", "Pokój kierownika"], ["105", "Pokój kierownika"], ["106", "Pomieszczenie biurowe"], ["107", "Pomieszczenie biurowe"], ["108", "Pomieszczenie biurowe"], ["109", "Pomieszczenie biurowe"], ["110", "Pomieszczenie biurowe"], ["111", "Pomieszczenie biurowe"], ["112", "Pomieszczenie biurowe"], ["113", "Pomieszczenie biurowe"], ["114", "Pomieszczenie biurowe"], ["115", "Pomieszczenie biurowe"], ["116", "Pomieszczenie biurowe"], ["117", "Pomieszczenie biurowe"], ["118", "Pomieszczenie biurowe"], ["119", "Pomieszczenie biurowe"], ["120", "Pomieszczenie biurowe"], ["121", "Pomieszczenie biurowe"], ["124", "Pomieszczenie biurowe"], ["125", "Pomieszczenie biurowe"], ["126", "Pomieszczenie biurowe"], ["127", "Pomieszczenie biurowe"], ["128", "Pomieszczenie biurowe"], ["129", "Pomieszczenie biurowe"], ["130", "Pomieszczenie biurowe"], ["132", "Pomieszczenie biurowe"], ["133", "Pomieszczenie biurowe"], ["134", "Pomieszczenie biurowe"], ["135", "Pom. socjalne"], ["136", "Pom. socjalne"], ["137", "Sala konferencyjna"], ["138", "Archiwum"], ["139", "Pom. na mat. biurowe"], ["140", "Sala konferencyjna"], ["141", "Sala konferencyjna"], ["142", "Pom. socjalne"], ["143", "Pom. socjalne"], ["K.144", "Korytarz"], ["K.145", "Korytarz"], ["K.146", "Korytarz"], ["KS.147", "Klatka schodowa"], ["W.149", "Winda"], ["W.150", "Winda"], ["KS.152", "Klatka schodowa"], ["153", "Pom. pomocnicze"], ["154", "Pom. socjalne"], ["Ł.155", "WC męski"], ["Ł.156", "Umywalnia męska"], ["T.157", "Pom. techniczne"], ["Ł.158", "WC dla niepełnospr."], ["Ł.159", "WC damskie"], ["Ł.160", "Umywalnia dam."], ["161", "Pom. pomocnicze"], ["162", "Pom. socjalne"]], "2": [["201", "Pomieszczenie biurowe"], ["202", "Pomieszczenie biurowe"], ["203", "Pomieszczenie biurowe"], ["204", "Pomieszczenie biurowe"], ["205", "Pomieszczenie biurowe"], ["206", "Pomieszczenie biurowe"], ["207", "Pomieszczenie biurowe"], ["208", "Pomieszczenie biurowe"], ["209", "Pomieszczenie biurowe"], ["210", "Pomieszczenie biurowe"], ["211", "Pomieszczenie"], ["212", "Pomieszczenie biurowe"], ["213", "Pomieszczenie biurowe"], ["214", "Pomieszczenie biurowe"], ["215", "Pomieszczenie biurowe"], ["216", "Pomieszczenie biurowe"], ["217", "Pomieszczenie biurowe"], ["218", "Pomieszczenie biurowe"], ["219", "Pomieszczenie biurowe"], ["220", "Pomieszczenie biurowe"], ["221", "Archiwum akt"], ["222", "Pomieszczenie biurowe"], ["223", "Pomieszczenie biurowe"], ["224", "Pomieszczenie biurowe"], ["225", "Pomieszczenie biurowe"], ["226", "Pomieszczenie biurowe"], ["227", "Pomieszczenie biurowe"], ["228", "Pomieszczenie"], ["229", "Pomieszczenie biurowe"], ["230", "Pomieszczenie biurowe"], ["231", "Pomieszczenie biurowe"], ["232", "Pomieszczenie biurowe"], ["233", "Pomieszczenie biurowe"], ["234", "Pomieszczenie biurowe"], ["235", "Pomieszczenie biurowe"], ["236", "Pom. socjalne"], ["237", "Pom. socjalne"], ["238", "Sala konferencyjna"], ["239.1", "Sala konferencyjna"], ["239.2", "Archiwum"], ["239.3", "Sala konferencyjna"], ["239.4", "Studio nagrań"], ["240", "Sala konferencyjna"], ["241", "Sala konferencyjna"], ["242", "Pom. socjalne"], ["243", "Pom. socjalne"], ["K.244", "Korytarz"], ["K.245", "Korytarz"], ["K.246", "Korytarz"], ["KS.247", "Klatka schodowa"], ["W.249", "Winda"], ["W.250", "Winda"], ["KS.252", "Klatka schodowa"], ["253", "Pom. dla matki karmiącej"], ["254", "Pomieszczenie socjalne"], ["Ł.255", "WC męski"], ["Ł.256", "Umywalnia męska"], ["T.257", "Pomieszczenie techniczne"], ["Ł.258", "WC dla niepełnospr."], ["Ł.259", "WC damski"], ["Ł.260", "Umywalnia dam."], ["261", "Pom. pomocnicze"], ["262", "Pomieszczenie socjalne"]], "3": [["301", "Poczekalnia"], ["302", "Sekretariat rektora"], ["303", "Gabinet rektora"], ["304", "Zespół hig.-sanit"], ["Ł.304a", "Zespół hig.-sanit."], ["306", "Sala konferencyjna"], ["307", "Pom. socjalne"], ["308", "Sala konferencyjna"], ["309", "Pom. socjalne"], ["310", "Sekretariat prorektorów"], ["311", "Gabinet prorektora"], ["312", "Zaplecze tech. sali"], ["313", "Gabinet prorektorów"], ["314", "Gabinet prorektorów"], ["315", "Gabinet prorektorów"], ["316", "Gabinet prorektorów"], ["Ł.317", "WC"], ["K.318", "Komunikacja wewnętrzna"], ["319", "Poczekalnia"], ["320", "Sekretariat kanclerza"], ["321", "Pomieszczenie socjalne"], ["322", "Gabinet kanclerza"], ["323", "Gab. zastepcy kanclerza"], ["324", "Gab. zastępcy kanclerza"], ["325", "Sala konferencyjna"], ["K.326", "Komunikacja wewnętrzna"], ["327", "Pomieszczenie biurowe"], ["328", "Pomieszczenie socjalne"], ["329", "Pomieszczenie biurowe"], ["329a", "Pomieszczenie biurowe"], ["330", "Sekretariat biura rektora"], ["331", "Gabinet kierownika biura"], ["K.332", "Korytarz"], ["K.333", "Korytarz"], ["KS.334", "Klatka schodowa"], ["W.336", "Winda"], ["W.337", "Winda"], ["KS.339", "Klatka schodowa"], ["T.341", "Pomieszczenie techniczne"], ["342", "Magazyn"], ["Ł.343", "Wc męskie"], ["Ł.344", "Umywalnia męska"], ["Ł.345", "Wc dla niepełnosprawnych"], ["346", "Pomieszczenie pomocnicze"], ["Ł.347", "Umywalnia damska"], ["Ł.348", "Wc damski"], ["349", "Pom. techniczne"], ["350", "Magazyn"]]};
+const ROOM_FIX = {"Ł.045":"WC męski","323":"Gab. zastępcy kanclerza","313":"Gabinet prorektora","314":"Gabinet prorektora","315":"Gabinet prorektora","316":"Gabinet prorektora","Ł.160":"Umywalnia damska","Ł.260":"Umywalnia damska","K.054":"Komunikacja wejściowa (wejście główne)"};
+const STAFF_ROLES = {
+  v:{role:"Parter"}, n:{role:"I piętro"}, e:{role:"II piętro"},
+  k:{role:"III piętro", note:"także wejście główne"}, s:{role:"Garaż, windy, teren", note:"pracownik gospodarczy"}
+};
+let STAFF = {};
+function loadTeam(){ let t={}; try{ t=JSON.parse(localStorage.getItem("ekko-team")||"{}")||{}; }catch(e){}
+  STAFF={}; for(const k in STAFF_ROLES){ const r=STAFF_ROLES[k], p=t[k]||{}; const name=(p.name||"").trim();
+    STAFF[k]={name: name || ("Osoba: "+r.role), voc: (p.voc||"").trim() || (name ? suggestVoc(name, p.g||guessG(name)) : r.role), g: p.g||guessG(name), note:r.note, set:!!name}; } }
+function guessG(name){ const f=(name||"").trim().split(/\s+/)[0]||""; return /a$/i.test(f) && !/^(Kuba|Barnaba|Bonawentura)$/i.test(f) ? "f" : "m"; }
+function suggestVoc(name, g){ const f=(name||"").trim().split(/\s+/)[0]||""; if(!f) return "";
+  if(g==="f") return "Pani "+(/a$/i.test(f)? f.slice(0,-1)+"o" : f);
+  let v=f; if(/er$/i.test(f)) v=f.slice(0,-2)+"rze"; else if(/ek$/i.test(f)) v=f.slice(0,-2)+"ku"; else if(/[kgh]$/i.test(f)) v=f+"u"; else if(/r$/i.test(f)) v=f+"ze"; else if(/[nmłpbtfwsz]$/i.test(f)) v=f+"ie"; else if(/a$/i.test(f)) v=f.slice(0,-1)+"o";
+  return "Panie "+v; }
+loadTeam();
+function renderTeam(){ let t={}; try{ t=JSON.parse(localStorage.getItem("ekko-team")||"{}")||{}; }catch(e){}
+  const rows=$("teamRows"); rows.innerHTML="";
+  Object.entries(STAFF_ROLES).forEach(([k,r])=>{ const p=t[k]||{}; const d=document.createElement("div"); d.className="teamrow";
+    d.innerHTML=`<b>${r.role}</b><input data-k="${k}" data-f="name" placeholder="Imię i nazwisko"><div class="row"><select data-k="${k}" data-f="g"><option value="f">Pani</option><option value="m">Pan</option></select><input data-k="${k}" data-f="voc" placeholder="Zwrot w podziękowaniu, np. Pani Anno"></div>`;
+    d.querySelector('[data-f=name]').value=p.name||""; d.querySelector('[data-f=g]').value=p.g||guessG(p.name||"")||"f"; d.querySelector('[data-f=voc]').value=p.voc||"";
+    d.querySelector('[data-f=name]').addEventListener("input",ev=>{ const g=guessG(ev.target.value); d.querySelector('[data-f=g]').value=g; const v=d.querySelector('[data-f=voc]'); if(!v.dataset.touched) v.value=suggestVoc(ev.target.value,g); });
+    d.querySelector('[data-f=g]').addEventListener("change",ev=>{ const v=d.querySelector('[data-f=voc]'); if(!v.dataset.touched) v.value=suggestVoc(d.querySelector('[data-f=name]').value, ev.target.value); });
+    d.querySelector('[data-f=voc]').addEventListener("input",ev=>{ ev.target.dataset.touched="1"; });
+    rows.appendChild(d); });
+  $("signName2").value=state.signName||"";
+  const done=Object.values(STAFF).every(x=>x.set);
+  $("teamState").textContent = done ? "uzupełnione" : "do uzupełnienia";
+  if(!done) $("team").open=true;
+}
+const FLOORS = [
+  {id:"-1", label:"Garaż", tag:"poziom −1", report:"Garaż (poziom −1)", who:"s"},
+  {id:"0", label:"Parter", tag:"poziom 0", report:"Parter", who:"v"},
+  {id:"1", label:"I piętro", tag:"poziom 1", report:"I piętro", who:"n"},
+  {id:"2", label:"II piętro", tag:"poziom 2", report:"II piętro", who:"e"},
+  {id:"3", label:"III piętro", tag:"poziom 3", report:"III piętro", who:"k"},
+  {id:"x", label:"Teren", tag:"zewnętrzny", report:"Teren zewnętrzny", who:"s"}
+];
+const ROOM_OWNER = {"K.054":"k"};
+function ownerOf(c){ if(!c) return null; if(ROOM_OWNER[c]) return ROOM_OWNER[c]; if(/^W\.|^W\.-/.test(c)) return "s"; return null; }
+const POINTS = ["Czystość podłóg","Czystość korytarzy","Czystość schodów i poręczy","Czystość sanitariatów","Czystość umywalek i luster","Uzupełnienie papieru toaletowego","Uzupełnienie mydła i ręczników","Opróżnienie koszy na odpady","Czystość biur, gabinetów i sal","Czystość drzwi i klamek","Usunięcie kurzu","Czystość parapetów","Czystość wejść i wind","Czystość pomieszczeń socjalnych","Stan techniczny wyposażenia"];
+// Garaż (poziom −1): według rzutu są tam hala garażowa HG.-112 i przedsionek wind W.-108 (oraz klatki schodowe, windy, pom. techniczne)
+const POINTS_GARAGE = ["Czystość posadzki w hali garażowej","Czystość przedsionka do wind","Czystość wind"];
+// Teren zewnętrzny (pracownik gospodarczy). Punkty sezonowe: poza sezonem zaznacz „Nie dotyczy”.
+const POINTS_OUTSIDE = ["Opróżnienie koszy przy wejściu głównym","Opróżnienie koszy z tyłu budynku","Uprzątnięcie liści przy wejściu głównym","Uprzątnięcie liści przy wjeździe do garażu","Odśnieżenie wejścia głównego (zima)","Porządek wokół budynku (śmieci, niedopałki)"];
+function pointsFor(fid){ return fid==="-1" ? POINTS_GARAGE : fid==="x" ? POINTS_OUTSIDE : POINTS; }
+const OTHER = "__other";
+
+const $ = id => document.getElementById(id);
+const todayISO = () => { const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); };
+let uid = 1;
+let state = blank("2");
+const photos = {}; // entryId -> [{file, url}]
+
+function blankFloor(fid){ return {sub:"", subOther:"", points:pointsFor(fid).map(()=>({s:"", entries:[]}))}; }
+function blank(floor){ return {date:todayISO(), due:"12:00", floor, floors:{}, mode:"all", signName:"", thanks:true, thanksSeed:0}; }
+function cur(){ const f=state.floors[state.floor]; if(f && f.points.length===pointsFor(state.floor).length) return f; return (state.floors[state.floor]=blankFloor(state.floor)); }
+function floorStarted(fid){ const f=state.floors[fid]; return !!(f && f.points.some(p=>p.s)); }
+function load(){ try{ const raw=localStorage.getItem("ekko-a33-v2"); if(raw){ const s=JSON.parse(raw); if(s && s.floors){ state=s; Object.values(s.floors).forEach(f=>f.points.forEach(p=>p.entries.forEach(e=>{ uid=Math.max(uid,(e.id||0)+1); }))); } } }catch(e){} }
+function save(){ try{ localStorage.setItem("ekko-a33-v2", JSON.stringify(state)); }catch(e){} }
+
+function roomsFor(fid){ if(fid==="x") return OUTSIDE_PLACES; return (ROOMS[fid]||[]).map(([c,n])=>[c, ROOM_FIX[c]||n]); }
+const OUTSIDE_PLACES=[["@wejscie","Wejście główne (na zewnątrz)"],["@tyl","Tył budynku"],["@wjazd","Wjazd do garażu"],["@chodnik","Chodniki wokół budynku"]];
+function roomLabel(c){ for(const f in ROOMS){ const r=ROOMS[f].find(x=>x[0]===c); if(r) return ROOM_FIX[c]||r[1]; } return ""; }
+function floorObj(){ return FLOORS.find(f=>f.id===state.floor)||FLOORS[0]; }
+function initials(n){ return n.split(" ").map(x=>x[0]).join("").slice(0,2); }
+
+function renderFloors(){
+  $("floors").innerHTML="";
+  FLOORS.forEach(f=>{
+    const b=document.createElement("button"); b.className="floor"; b.type="button"; b.setAttribute("aria-pressed", f.id===state.floor);
+    b.innerHTML=`${f.label}<span>${floorStarted(f.id)?"● ":""}${f.tag}</span>`; if(floorStarted(f.id)) b.title="Na tym piętrze są już oceny";
+    b.onclick=()=>{ state.floor=f.id; save(); renderAll(); };
+    $("floors").appendChild(b);
+  });
+  const f=floorObj(), st=STAFF[f.who];
+  const subName = currentSub();
+  $("who").innerHTML = `<div class="ini">${initials(subName||st.name)}</div><div><small>${subName?"Zastępstwo za: "+st.name:"Osoba odpowiedzialna"}</small><b>${subName||st.name}</b>${st.note&&!subName?`<small>${st.note}</small>`:""}</div>`;
+  const sel=$("sub"); sel.innerHTML=`<option value="">Brak, pracuje ${st.name}</option>`+Object.entries(STAFF).filter(([k])=>k!==f.who).map(([k,s])=>`<option value="${k}">${s.name}</option>`).join("")+`<option value="${OTHER}">Inna osoba…</option>`;
+  sel.value=cur().sub && (cur().sub===OTHER||STAFF[cur().sub]) && cur().sub!==f.who ? cur().sub : "";
+  $("subOtherWrap").hidden = sel.value!==OTHER; $("subOther").value=cur().subOther||"";
+}
+function currentSub(){ if(cur().sub===OTHER) return (cur().subOther||"").trim(); if(cur().sub && STAFF[cur().sub] && cur().sub!==floorObj().who) return STAFF[cur().sub].name; return ""; }
+
+function renderItems(){
+  const box=$("items"); box.innerHTML="";
+  cur().points.forEach((p,i)=>{
+    const it=document.createElement("div"); it.className="item"; it.dataset.s=p.s||"none";
+    it.innerHTML=`<div class="ititle"><span class="n">${i+1}</span><b>${pointsFor(state.floor)[i]}</b></div>
+      <div class="seg" role="group" aria-label="${pointsFor(state.floor)[i]}">
+        <button type="button" data-v="ok" aria-pressed="${p.s==="ok"}">OK</button>
+        <button type="button" data-v="fix" aria-pressed="${p.s==="fix"}">Do poprawy</button>
+        <button type="button" data-v="na" aria-pressed="${p.s==="na"}">Nie dotyczy</button>
+      </div>`;
+    it.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{
+      const v=b.dataset.v; p.s = p.s===v ? "" : v;
+      if(p.s==="fix" && !p.entries.length) p.entries.push({id:uid++, room:"", other:"", desc:"", due:""});
+      save(); renderItems(); renderReport();
+    });
+    if(p.s==="fix"){
+      const en=document.createElement("div"); en.className="entries";
+      p.entries.forEach((e,j)=>en.appendChild(entryEl(p,e,j)));
+      const add=document.createElement("button"); add.type="button"; add.className="btn link"; add.textContent="+ Dodaj kolejne pomieszczenie";
+      add.onclick=()=>{ p.entries.push({id:uid++, room:"", other:"", desc:"", due:""}); save(); renderItems(); renderReport(); };
+      en.appendChild(add); it.appendChild(en);
+    }
+    box.appendChild(it);
+  });
+  const c={ok:0,fix:0,na:0,"":0}; cur().points.forEach(p=>c[p.s||""]++);
+  document.querySelectorAll('#floors .floor').forEach((b,k)=>{ const f=FLOORS[k]; b.querySelector('span').textContent=(floorStarted(f.id)?'● ':'')+f.tag; });
+  const N=cur().points.length; $("cnt").textContent=`sprawdzono ${N-c[""]} z ${N}`;
+  $("bar").innerHTML=`<i style="width:${c.ok/N*100}%;background:var(--ok)"></i><i style="width:${c.fix/N*100}%;background:var(--fix)"></i><i style="width:${c.na/N*100}%;background:var(--na)"></i>`;
+}
+
+function entryEl(p,e,j){
+  const d=document.createElement("div"); d.className="entry";
+  const rooms=roomsFor(state.floor);
+  const opts=rooms.map(([c,n])=>`<option value="${c}">${c[0]==="@"?n:c+" · "+n}</option>`).join("");
+  d.innerHTML=`<div class="head"><span>Zadanie ${j+1}</span><button type="button" class="btn link danger small" data-del>Usuń</button></div>
+    <label class="f">Pomieszczenie<select data-k="room"><option value="">Wybierz…</option>${opts}<option value="${OTHER}">Inne / wpisz ręcznie</option></select></label>
+    <label class="f" data-otherwrap ${e.room===OTHER?"":"hidden"}>Miejsce<input data-k="other" placeholder="np. klatka schodowa przy windach"></label>
+    <div class="owner" data-owner hidden></div>
+    <label class="f">Co poprawić<textarea data-k="desc" placeholder="np. usunąć kurz z biurek i szafek"></textarea></label>
+    <div class="row">
+      <label class="f">Termin (pusty = domyślny)<input type="time" data-k="due"></label>
+    </div>
+    <div class="ph" data-ph></div>`;
+  const sel=d.querySelector('[data-k="room"]'); sel.value=e.room||"";
+  d.querySelector('[data-k="other"]').value=e.other||"";
+  d.querySelector('[data-k="desc"]').value=e.desc||"";
+  d.querySelector('[data-k="due"]').value=e.due||"";
+  const showOwner=()=>{ const o=ownerOf(e.room), el=d.querySelector("[data-owner]"); const f=floorObj(); if(o && o!==f.who){ el.hidden=false; el.textContent="To miejsce sprząta: "+STAFF[o].name; } else el.hidden=true; };
+  showOwner();
+  d.querySelectorAll("[data-k]").forEach(inp=>{
+    inp.addEventListener("input",()=>{ e[inp.dataset.k]=inp.value; if(inp.dataset.k==="room"){ d.querySelector("[data-otherwrap]").hidden = inp.value!==OTHER; showOwner(); } save(); renderReport(); });
+  });
+  d.querySelector("[data-del]").onclick=()=>{ p.entries.splice(j,1); delete photos[e.id]; if(!p.entries.length) p.s=""; save(); renderItems(); renderReport(); };
+  renderPhotos(d.querySelector("[data-ph]"), e);
+  return d;
+}
+
+function renderPhotos(box,e){
+  box.innerHTML="";
+  (photos[e.id]||[]).forEach((ph,k)=>{
+    const t=document.createElement("div"); t.className="thumb";
+    t.innerHTML=`<img alt="Zdjęcie ${k+1}" src="${ph.url}"><button type="button" aria-label="Usuń zdjęcie">×</button>`;
+    t.querySelector("button").onclick=()=>{ URL.revokeObjectURL(ph.url); photos[e.id].splice(k,1); renderPhotos(box,e); renderReport(); };
+    box.appendChild(t);
+  });
+  const lab=document.createElement("label"); lab.className="btn small photo-btn"; lab.textContent="📷 Zrób / dodaj zdjęcie";
+  const inp=document.createElement("input"); inp.type="file"; inp.accept="image/*"; inp.setAttribute("capture","environment"); inp.setAttribute("aria-label","Zdjęcie");
+  inp.onchange=async()=>{ const f=inp.files&&inp.files[0]; if(!f) return; const small=await shrink(f, e); (photos[e.id]=photos[e.id]||[]).push({file:small, url:URL.createObjectURL(small)}); renderPhotos(box,e); renderReport(); };
+  lab.appendChild(inp); box.appendChild(lab);
+}
+
+function shrink(file, e){
+  return new Promise(res=>{
+    const img=new Image(), u=URL.createObjectURL(file);
+    img.onload=()=>{ const m=1600, sc=Math.min(1, m/Math.max(img.width,img.height)); const c=document.createElement("canvas"); c.width=Math.round(img.width*sc); c.height=Math.round(img.height*sc);
+      c.getContext("2d").drawImage(img,0,0,c.width,c.height); URL.revokeObjectURL(u);
+      c.toBlob(b=>{ if(!b) return res(file); const where=placeName(e).replace(/[^\wąćęłńóśźżĄĆĘŁŃÓŚŹŻ.-]+/g,"_"); res(new File([b], `A33_${where||"zdjecie"}_${Date.now()%100000}.jpg`, {type:"image/jpeg"})); }, "image/jpeg", .82); };
+    img.onerror=()=>{ URL.revokeObjectURL(u); res(file); };
+    img.src=u;
+  });
+}
+
+function placeName(e){
+  if(e.room && e.room[0]==="@"){ const o=OUTSIDE_PLACES.find(x=>x[0]===e.room); return o?o[1]:""; }
+  if(e.room===OTHER) return (e.other||"").trim();
+  if(!e.room) return "";
+  if(e.room==="K.054") return "Wejście główne (K.054)";
+  if(/^\d/.test(e.room)) return "Pomieszczenie "+e.room;
+  return e.room+" "+roomLabel(e.room).replace(" (wejście główne)","");
+}
+function fmtDate(iso){ if(!iso) return ""; const [y,m,d]=iso.split("-"); return `${d}.${m}.${y}`; }
+function nowHM(){ const d=new Date(); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+
+function buildFloorReport(){
+  const f=floorObj(), st=STAFF[f.who], sub=currentSub();
+  const L=[];
+  L.push("📋 *KARTA KONTROLI OBIEKTU*");
+  L.push("🏢 A33 Nowy Rektorat · 📅 "+fmtDate(state.date));
+  L.push("");
+  L.push("📍 *"+f.report+"*");
+  L.push("👤 "+(sub? sub+" (zastępstwo za: "+st.name+")" : st.name));
+  const extra=new Set();
+  let ok=0, fix=0;
+  const dueMain=state.due;
+  const lines=[];
+  cur().points.forEach((p,i)=>{
+    if(p.s==="ok"){ ok++; lines.push("✅ "+pointsFor(state.floor)[i]); }
+    if(p.s==="fix"){ fix++;
+      lines.push(""); lines.push("❌ *"+pointsFor(state.floor)[i]+"*");
+      p.entries.forEach(e=>{
+        let where=placeName(e)||"Miejsce do wskazania";
+        let t=where+" – "+((e.desc||"").trim()||"do poprawy")+"";
+        if(!/[.!?]$/.test(t)) t+=".";
+        if(e.due && e.due!==dueMain) t+=" ⏰ do "+e.due;
+        const o=ownerOf(e.room); if(o && o!==f.who){ t+=" 👤 "+STAFF[o].name; extra.add(STAFF[o].name); }
+        t+=photoTag(e);
+        lines.push(t);
+      });
+      lines.push("");
+    }
+  });
+  if(extra.size) L.push("👤 Także: "+[...extra].join(", "));
+  L.push("");
+  while(lines.length && lines[lines.length-1]==="") lines.pop();
+  if(!lines.length){ L.push("_(brak ocenionych punktów)_"); }
+  L.push(...lines.filter((x,k,a)=>!(x===""&&a[k-1]==="")));
+  L.push("");
+  if(fix){
+    const today = state.date===todayISO();
+    L.push("⏰ Termin realizacji: do "+(today?"":fmtDate(state.date)+", ")+"godz. "+(dueMain||"12:00")+".");
+    L.push("");
+    L.push("Proszę o potwierdzenie wykonania zadań.");
+    if(ok) L.push("Dziękuję za pozostałe prawidłowo wykonane czynności.");
+  } else if(ok){
+    L.push(state.thanks!==false ? "🙏 "+thanksFor(state.floor, 0) : "Wszystko w porządku. Dziękuję za dobrze wykonaną pracę! 👏");
+  }
+  L.push("");
+  L.push(signature());
+  L.push(nowHM());
+  return L.join("\n");
+}
+
+function subFor(fid){ const fl=state.floors[fid], f=FLOORS.find(x=>x.id===fid); if(!fl) return ""; if(fl.sub===OTHER) return (fl.subOther||"").trim(); if(fl.sub && STAFF[fl.sub] && fl.sub!==f.who) return STAFF[fl.sub].name; return ""; }
+function entryLine(e, f){
+  let t=(placeName(e)||"Miejsce do wskazania")+" – "+((e.desc||"").trim()||"do poprawy");
+  if(e.due && e.due!==state.due) t+=" ⏰ do "+e.due;
+  const o=ownerOf(e.room); if(o && o!==f.who) t+=" 👤 "+STAFF[o].name;
+  t+=photoTag(e);
+  return t;
+}
+// Podziękowania: konkretne, imienne, z zaufaniem i docenieniem (jak w materiałach szkoleniowych o informacji zwrotnej)
+const THANKS = [
+  "{V}, ani jednej uwagi – dziękuję za wzorowy porządek! 👏",
+  "{V}, bardzo dziękuję. Dzięki {G} pracy budynek A33 jest wizytówką Politechniki Poznańskiej. 🌟",
+  "{V}, wszystko lśni. Dziękuję za staranność i zaangażowanie, to widać na każdym kroku. ✨",
+  "{V}, wzorowo! Mam do {G} pełne zaufanie – dziękuję w imieniu Politechniki Poznańskiej. 🤝",
+  "{V}, dziękuję za świetnie wykonaną pracę. Pracownicy, studenci i goście Politechniki Poznańskiej to doceniają. 💐",
+  "{V}, czysto i zadbane w każdym punkcie. Serdecznie dziękuję za rzetelną pracę! 💪"
+];
+const THANKS_ANY = [
+  "{N} – ani jednej uwagi, dziękuję za wzorowy porządek! 👏",
+  "{N} – wszystko lśni, dziękuję za rzetelną pracę dla Politechniki Poznańskiej! ✨",
+  "{N} – wzorowo, serdecznie dziękuję za zaangażowanie! 🤝"
+];
+const TEAM_THANKS = [
+  "Dziękuję całemu zespołowi – budynek A33 jest dziś wizytówką Politechniki Poznańskiej. 🌟",
+  "Cały budynek bez uwag. Dziękuję Wam wszystkim za świetną pracę! 👏",
+  "Wspaniała robota całego zespołu. Dziękuję w imieniu Politechniki Poznańskiej! 🤝"
+];
+function hash(str){ let h=7; for(const c of str) h=(h*31+c.charCodeAt(0))>>>0; return h; }
+function pick(arr, key){ return arr[hash(key+"|"+(state.thanksSeed||0))%arr.length]; }
+function thanksFor(fid, k){
+  const f=FLOORS.find(x=>x.id===fid), fl=state.floors[fid]; let person=STAFF[f.who];
+  if(fl && fl.sub===OTHER){ const n=(fl.subOther||"").trim(); if(n) return pick(THANKS_ANY, state.date+fid).replace("{N}", n); }
+  else if(fl && fl.sub && STAFF[fl.sub] && fl.sub!==f.who) person=STAFF[fl.sub];
+  const base=hash(state.date+"|"+(state.thanksSeed||0))%THANKS.length;
+  return THANKS[(base+k)%THANKS.length].replace("{V}", person.voc).replace("{G}", person.g==="m"?"Pana":"Pani");
+}
+function signature(){ const n=(state.signName||"").trim(); return "Kierownik obiektu"+(n?" "+n:""); }
+function buildBuildingReport(){
+  const L=["📋 *KARTA KONTROLI OBIEKTU*","🏢 A33 Nowy Rektorat · 📅 "+fmtDate(state.date)];
+  let anyFix=0, anyOk=0, started=0, praised=0;
+  FLOORS.forEach(f=>{
+    if(!floorStarted(f.id) || state.floors[f.id].points.length!==pointsFor(f.id).length) return; started++;
+    const fl=state.floors[f.id], st=STAFF[f.who], sub=subFor(f.id);
+    const ok=fl.points.filter(p=>p.s==="ok").length;
+    const fixes=fl.points.map((p,i)=>[p,i]).filter(([p])=>p.s==="fix");
+    anyOk+=ok; anyFix+=fixes.length;
+    L.push("");
+    L.push("📍 *"+f.report+"* · 👤 "+(sub? sub+" (zast.)" : st.name));
+    if(!fixes.length){ L.push("✅ Wszystko OK"+(ok?" ("+ok+" pkt)":"")); if(ok && state.thanks!==false) L.push("🙏 "+thanksFor(f.id, praised++)); return; }
+    fixes.forEach(([p,i])=>{ L.push("❌ "+pointsFor(f.id)[i]); p.entries.forEach(e=>L.push("   • "+entryLine(e,f))); });
+    if(ok) L.push("✅ Pozostałe sprawdzone: OK ("+ok+" pkt)");
+  });
+  if(!started){ L.push(""); L.push("_(brak ocenionych punktów)_"); }
+  L.push("");
+  if(anyFix){
+    const today=state.date===todayISO();
+    L.push("⏰ Termin: do "+(today?"":fmtDate(state.date)+", ")+"godz. "+(state.due||"12:00")+".");
+    L.push("Proszę o potwierdzenie wykonania zadań.");
+    if(anyOk) L.push("Dziękuję za pozostałe prawidłowo wykonane czynności.");
+  } else if(anyOk) L.push(state.thanks!==false && started>1 ? pick(TEAM_THANKS, state.date) : "Dziękuję za dobrze wykonaną pracę!");
+  L.push(""); L.push(signature()); L.push(nowHM());
+  return L.join("\n");
+}
+function buildReport(){ return state.mode==="floor" ? buildFloorReport() : buildBuildingReport(); }
+function photoItems(){ const out=[];
+  const fids = state.mode==="floor" ? [state.floor] : FLOORS.map(f=>f.id).filter(id=>state.floors[id] && state.floors[id].points.length===pointsFor(id).length);
+  fids.forEach(fid=>{ const fl=fid===state.floor?cur():state.floors[fid]; fl.points.forEach((p,pi)=>{ if(p.s==="fix") p.entries.forEach(e=>(photos[e.id]||[]).forEach(ph=>out.push({ph, e, fid, pi, n:out.length+1}))); }); });
+  return out; }
+function allPhotoFiles(){ return photoItems().map(x=>x.ph); }
+function photoTag(e){ const ns=photoItems().filter(x=>x.e.id===e.id).map(x=>x.n); if(!ns.length) return ""; return " 📷 zdj. "+(ns.length>1? ns[0]+"–"+ns[ns.length-1] : ns[0]); }
+// Zdjęcie z opisem wpisanym na dole: numer, miejsce, co poprawić, kto, termin
+function stamp(item){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      const W=img.width, H=img.height, f=FLOORS.find(x=>x.id===item.fid), e=item.e;
+      const fs=Math.max(18, Math.round(W/26)), pad=Math.round(fs*0.7), lh=Math.round(fs*1.3);
+      const c=document.createElement("canvas"); const ctx=c.getContext("2d");
+      ctx.font=`600 ${fs}px "IBM Plex Sans", Arial, sans-serif`;
+      const wrap=(t,max)=>{ const out=[]; let line=""; t.split(/\s+/).forEach(w=>{ const tr=line?line+" "+w:w; if(ctx.measureText(tr).width>max && line){ out.push(line); line=w; } else line=tr; }); if(line) out.push(line); return out; };
+      const o=ownerOf(e.room), who=STAFF[o && o!==f.who ? o : f.who].name;
+      const due=e.due||state.due||"12:00";
+      const lines=[
+        ...wrap(`Zdj. ${item.n} · ${f.report} · ${placeName(e)||"miejsce do wskazania"}`, W-2*pad),
+        ...wrap(`${pointsFor(item.fid)[item.pi]}: ${(e.desc||"do poprawy").trim()}`, W-2*pad),
+        ...wrap(`👤 ${who} · ⏰ do ${due} · A33 · ${fmtDate(state.date)}`, W-2*pad)
+      ];
+      const band=pad*2+lines.length*lh;
+      c.width=W; c.height=H+band;
+      ctx.drawImage(img,0,0);
+      ctx.fillStyle="#18233a"; ctx.fillRect(0,H,W,band);
+      ctx.fillStyle="#c2352a"; ctx.fillRect(0,H,W,Math.max(4,Math.round(fs/5)));
+      ctx.fillStyle="#ffffff"; ctx.textBaseline="top";
+      lines.forEach((l,i)=>{ ctx.font=`${i===0?700:500} ${fs}px "IBM Plex Sans", Arial, sans-serif`; ctx.fillText(l, pad, H+pad+i*lh); });
+      c.toBlob(b=>res(b), "image/jpeg", .85);
+    };
+    img.onerror=()=>res(item.ph.file);
+    img.src=item.ph.url;
+  });
+}
+function stampName(item){ const w=(placeName(item.e)||"miejsce").replace(/[^0-9A-Za-ząćęłńóśźżĄĆĘŁŃÓŚŹŻ.-]+/g,"_"); return `A33_zdj${item.n}_${w}.jpg`; }
+let downloadsNs=null;
+async function initDownloads(){ try{ if(window.claude && window.claude.use){ downloadsNs = await window.claude.use("downloads"); renderReport(); } }catch(e){ downloadsNs=null; } }
+setTimeout(()=>{ if(window.claude) initDownloads(); else window.addEventListener("load", initDownloads, {once:true}); }, 0);
+async function savePhotos(){
+  const items=photoItems(); if(!items.length) return;
+  let saved=0;
+  for(const it of items){
+    const blob=await stamp(it);
+    try{ await downloadsNs.save({filename:stampName(it), data:blob}); saved++; }
+    catch(err){ const c=err&&err.code; if(c==="declined") break; if(c==="rate_limited"){ toast("Poczekaj chwilę i spróbuj ponownie"); break; } toast("Nie udało się zapisać zdjęć w tym widoku"); break; }
+  }
+  if(saved) toast(`Zapisano zdjęcia z opisem: ${saved}`);
+}
+function _oldPhotos(){ const out=[]; cur().points.forEach(p=>{ if(p.s==="fix") p.entries.forEach(e=>(photos[e.id]||[]).forEach(ph=>out.push(ph))); }); return out; }
+
+function renderReport(){
+  document.querySelectorAll("#mode button").forEach(b=>b.setAttribute("aria-pressed", (state.mode||"all")===b.dataset.m));
+  const txt=buildReport();
+  $("report").textContent=txt;
+  $("waLink").href="https://wa.me/?text="+encodeURIComponent(txt);
+  const ph=allPhotoFiles();
+  $("allPhotos").innerHTML=ph.map((p,i)=>`<img alt="Zdjęcie do raportu ${i+1}" src="${p.url}">`).join("");
+  const canFiles = ph.length && navigator.canShare && (()=>{ try{ return navigator.canShare({files:ph.map(p=>p.file)}); }catch(e){ return false; } })();
+  $("shareBtn").hidden = !canFiles;
+  $("saveBtn").hidden = !(ph.length && !canFiles && downloadsNs);
+  $("saveBtn").textContent = `📷 Zapisz zdjęcia z opisem (${ph.length})`;
+  const twoStep=!$("saveBtn").hidden;
+  $("waLink").textContent = twoStep ? "1. Wyślij tekst raportu na WhatsApp" : "Wyślij raport na WhatsApp";
+  if(twoStep) $("saveBtn").textContent = `2. 📷 Zapisz zdjęcia z opisem (${ph.length})`;
+  $("shareHint").textContent = ph.length && !canFiles
+    ? "Najpierw wyślij tekst raportu. Potem zapisz zdjęcia: każde ma na dole numer, miejsce i opis zadania, taki sam jak w raporcie (zdj. 1, zdj. 2…). Na iPhonie od razu otworzy się menu udostępniania, wybierz WhatsApp. Na Androidzie zdjęcie zapisze się w telefonie i w WhatsApp dołączasz je spinaczem."
+    : "WhatsApp otworzy listę czatów. Wybierz grupę zespołu i wyślij.";
+}
+
+async function share(){
+  const txt=buildReport(); const files=[]; for(const it of photoItems()){ const b=await stamp(it); files.push(new File([b], stampName(it), {type:"image/jpeg"})); }
+  try{ await navigator.share({text:txt, files}); toast("Przekazano do udostępnienia"); }
+  catch(err){ if(err && err.name==="AbortError") return; toast("Udostępnianie zablokowane. Użyj przycisku z tekstem."); $("shareBtn").hidden=true; }
+}
+async function copy(){
+  const txt=buildReport();
+  try{ await navigator.clipboard.writeText(txt); toast("Skopiowano raport"); }
+  catch(e){ const r=document.createRange(); r.selectNodeContents($("report")); const s=getSelection(); s.removeAllRanges(); s.addRange(r); toast("Zaznaczono tekst, skopiuj go ręcznie"); }
+}
+let tt; function toast(m){ const t=$("toast"); t.textContent=m; t.hidden=false; clearTimeout(tt); tt=setTimeout(()=>t.hidden=true,2600); }
+
+function renderAll(){ if(state.signName===undefined) state.signName=""; $("signName").value=state.signName; $("thanksOn").checked=state.thanks!==false; $("exNote").hidden=!state.example; $("date").value=state.date; $("due").value=state.due; renderFloors(); renderItems(); renderReport(); }
+
+$("date").oninput=e=>{ state.date=e.target.value; save(); renderReport(); };
+$("due").oninput=e=>{ state.due=e.target.value; save(); renderReport(); };
+$("sub").onchange=e=>{ cur().sub=e.target.value; save(); renderFloors(); renderReport(); };
+$("subOther").oninput=e=>{ cur().subOther=e.target.value; save(); const f=floorObj(); renderReport(); const w=$("who"); w.querySelector("b").textContent=currentSub()||STAFF[f.who].name; };
+$("restOk").onclick=()=>{ cur().points.forEach(p=>{ if(!p.s) p.s="ok"; }); save(); renderItems(); renderReport(); toast("Pozostałe punkty oznaczone jako OK"); };
+$("shareBtn").onclick=share;
+$("teamSave").onclick=()=>{ const t={}; document.querySelectorAll("#teamRows [data-k]").forEach(i=>{ (t[i.dataset.k]=t[i.dataset.k]||{})[i.dataset.f]=i.value.trim(); });
+  try{ localStorage.setItem("ekko-team", JSON.stringify(t)); }catch(e){}
+  state.signName=$("signName2").value.trim(); save(); loadTeam(); renderTeam(); renderAll(); $("team").open=false; toast("Zapisano zespół"); };
+$("saveBtn").onclick=savePhotos;
+
+$("thanksOn").onchange=e=>{ state.thanks=e.target.checked; save(); renderReport(); };
+$("thanksNew").onclick=()=>{ state.thanksSeed=(state.thanksSeed||0)+1; save(); renderReport(); toast("Wylosowano inne podziękowania"); };
+document.querySelectorAll("#mode button").forEach(b=>b.onclick=()=>{ state.mode=b.dataset.m; save(); renderReport(); });
+$("copyBtn").onclick=copy;
+$("newBtn").onclick=()=>{ $("confirmBox").hidden=false; };
+$("confirmNo").onclick=()=>{ $("confirmBox").hidden=true; };
+$("confirmYes").onclick=()=>{ Object.values(photos).flat().forEach(p=>URL.revokeObjectURL(p.url)); for(const k in photos) delete photos[k];
+  state.example=false; const keep={date:state.date, due:state.due, floor:state.floor, mode:state.mode, signName:state.signName, thanks:state.thanks}; state=blank(keep.floor); state.date=keep.date; state.due=keep.due; state.mode=keep.mode||"all"; if(keep.signName!==undefined) state.signName=keep.signName; state.thanks=keep.thanks!==false; save(); $("confirmBox").hidden=true; renderAll(); scrollTo({top:0}); toast("Nowa kontrola gotowa"); };
+
+load();
+// Przykład na start (tylko gdy nic nie zapisano): II piętro, jak w opisie projektu
+Object.keys(state.floors).forEach(fid=>{ if(state.floors[fid].points.length!==pointsFor(fid).length) delete state.floors[fid]; });
+if(!Object.keys(state.floors).some(floorStarted)){
+  state.floor="2";
+  [0,1,3,7].forEach(i=>cur().points[i].s="ok");
+  cur().points[10]={s:"fix", entries:[{id:uid++, room:"225", other:"", desc:"usunąć kurz z biurek i szafek", due:""}]};
+  cur().points[9]={s:"fix", entries:[{id:uid++, room:"227", other:"", desc:"umyć drzwi i klamki", due:""}]};
+  state.example=true;
+  state.floors["0"]=blankFloor("0");
+  state.floors["0"].points[0].s="ok";
+  state.floors["0"].points[12]={s:"fix", entries:[{id:uid++, room:"K.054", other:"", desc:"wytrzeć ślady błota przy drzwiach wejściowych", due:""}]};
+  state.floors["-1"]=blankFloor("-1");
+  state.floors["-1"].points.forEach(p=>p.s="ok");
+}
+renderAll(); renderTeam();
+if("serviceWorker" in navigator && location.protocol==="https:"){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+</script>
+
+</body>
+</html>
