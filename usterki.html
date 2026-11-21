@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#18233a">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Usterki A33</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Ten sam arkusz co karta kontroli: jedna kolumna, karty, liczby pismem technicznym */
+:root{
+  --bg:#eef1f5; --paper:#ffffff; --ink:#18233a; --muted:#5d6779; --line:#d6dce5;
+  --accent:#1f56b3; --accent-ink:#ffffff; --accent-soft:#e3ebf9;
+  --ok:#1d7a47; --ok-soft:#e1f3e8; --warn:#a15c00; --warn-soft:#fdf0dc; --fix:#c2352a; --fix-soft:#fbe7e5;
+  --f-head:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0f141d; --paper:#18202d; --ink:#e7ecf4; --muted:#9aa5b8; --line:#2c3748;
+  --accent:#6f9cf0; --accent-ink:#0b1220; --accent-soft:#1d2a44;
+  --ok:#5cc58a; --ok-soft:#163324; --warn:#f0b35c; --warn-soft:#3a2a12; --fix:#f07a6e; --fix-soft:#3a1d1b; color-scheme:dark}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 96px}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{padding-block:18px 4px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-head);font-size:30px;line-height:1.1;margin:0;text-wrap:balance}
+h2{font-family:var(--f-head);font-size:20px;margin:0}
+.sub{color:var(--muted);font-size:14px;margin:0}
+a.back{color:var(--accent);font-weight:600;text-decoration:none;font-size:14px}
+.tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding-block:8px;z-index:5}
+.tabs button{font:inherit;font-weight:600;font-size:14px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:10px 4px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+section.card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--muted);min-width:0}
+input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%;min-width:0}
+textarea{min-height:56px;resize:vertical}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.list{display:flex;flex-direction:column;margin:0 -16px}
+.prod{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}
+.prod .ic{width:44px;height:44px;border-radius:8px;background:var(--accent-soft);display:grid;place-items:center;font-size:22px}
+.prod b{display:block;font-weight:600;line-height:1.25}
+.prod small{color:var(--muted);font-size:13px}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{width:40px;height:40px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:20px;font-weight:600;cursor:pointer;line-height:1}
+.qty output{min-width:28px;text-align:center;font-family:var(--f-mono);font-size:18px;font-variant-numeric:tabular-nums}
+.prod.picked{background:var(--accent-soft)}
+.stock{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:20px;text-align:right;line-height:1.1}
+.stock small{display:block;font-family:var(--f-body);font-size:12px}
+.pill{display:inline-block;font-size:12px;font-weight:600;border-radius:999px;padding:2px 8px;margin-top:4px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.low{background:var(--warn-soft);color:var(--warn)}.pill.out{background:var(--fix-soft);color:var(--fix)}
+.btn{font:inherit;font-weight:600;border-radius:8px;padding:11px 14px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-align:center}
+.btn.primary{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn.accent{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.small{padding:7px 10px;font-size:14px}
+.actions{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1 1 140px;min-width:0}
+pre.msg{white-space:pre-wrap;word-break:break-word;font-family:var(--f-body);font-size:15px;background:var(--bg);border:1px dashed var(--line);border-radius:8px;padding:12px;margin:0}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.note{background:var(--warn-soft);color:var(--ink);border-radius:8px;padding:10px 12px;font-size:14px}
+.edit{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;grid-column:1/-1}
+.hist{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.hist div{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:6px}
+.hist span:last-child{font-family:var(--f-mono);white-space:nowrap}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-size:14px;z-index:20}
+.tabs.two{grid-template-columns:1fr 1fr}
+.seg2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.seg2 button{font:inherit;font-weight:600;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:10px;cursor:pointer}
+.seg2 button[data-u="0"][aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.seg2 button[data-u="1"][aria-pressed="true"]{background:var(--fix);border-color:var(--fix);color:#fff}
+.ph{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ph img{width:88px;height:88px;object-fit:cover;border-radius:6px;border:1px solid var(--line)}
+.thumb{position:relative}
+.thumb button{position:absolute;top:-6px;right:-6px;width:24px;height:24px;border-radius:50%;border:none;background:var(--ink);color:var(--paper);font-size:14px;line-height:24px;cursor:pointer;padding:0}
+.photo-btn{position:relative;overflow:hidden}.photo-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.usterka{align-items:start}.usterka .desc{font-size:14px;margin-top:4px}.usterka.done{opacity:.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="back" href="./">← Karta kontroli</a>
+    <div class="eyebrow">E-KKO · Budynek A33 · prototyp</div>
+    <h1>Zgłoś usterkę</h1>
+    <p class="sub">Dla pana Sylwestra: miejsce, opis i zdjęcie z podpisem, wysyłane do grupy.</p>
+  </header>
+
+  <div class="tabs two" role="tablist">
+    <button role="tab" data-t="new" aria-selected="true">Nowe zgłoszenie</button>
+    <button role="tab" data-t="list" aria-selected="false">Lista usterek <span id="openCnt"></span></button>
+  </div>
+
+  <section class="card" id="t-new">
+    <label class="f">Kto zgłasza<select id="who"></select></label>
+    <label class="f">Piętro<select id="floor"></select></label>
+    <label class="f">Pomieszczenie<select id="room"></select></label>
+    <label class="f" id="otherWrap" hidden>Miejsce<input id="other" placeholder="np. klatka schodowa przy windach"></label>
+    <label class="f">Rodzaj<select id="kind"></select></label>
+    <label class="f">Co się stało<textarea id="desc" placeholder="np. rozwalone drzwiczki pod zlewem"></textarea></label>
+    <div class="seg2" role="group" aria-label="Pilność">
+      <button type="button" data-u="0" aria-pressed="true">Zwykłe</button>
+      <button type="button" data-u="1" aria-pressed="false">❗ Pilne</button>
+    </div>
+    <div class="ph" id="ph"></div>
+    <pre class="msg" id="msg"></pre>
+    <div class="actions">
+      <button class="btn primary" id="shareBtn" hidden>Wyślij do grupy ze zdjęciem</button>
+      <a class="btn primary" id="waLink" href="https://wa.me/" target="_blank" rel="noopener">Wyślij do grupy na WhatsApp</a>
+      <p class="hint" id="hint">WhatsApp otworzy listę czatów: wybierz grupę „Nowy Rektorat – Zespół porządkowy”.</p>
+    </div>
+  </section>
+
+  <section class="card" id="t-list" hidden>
+    <h2>Usterki zgłoszone z tego telefonu</h2>
+    <div class="list" id="list"></div>
+    <p class="hint">Gdy pan Sylwester naprawi usterkę, kliknij „Naprawione”. Na razie lista jest tylko w tym telefonie.</p>
+  </section>
+</div>
+<div class="toast" id="toast" hidden></div>
+<script>
+const ROOMS = {"-1": [["T.-101", "Pomieszczenie techniczne"], ["G.-102", "Pom. gosp. buforowe"], ["KS.-103", "Przedsionek"], ["KS.-104", "Klatka schodowa"], ["W.-106", "Winda"], ["W.-107", "Winda"], ["W.-108", "Przedsionek wind"], ["KS.-110", "Klatka schodowa"], ["KS.-111", "Przedsionek"], ["HG.-112", "Hala garażowa"]], "0": [["001", "Pom. biurowe"], ["002", "Pom. biurowe"], ["003", "Pom. biurowe"], ["004", "Pom. biurowe"], ["005", "Pom. biurowe"], ["006", "Archiwum"], ["007", "Pom. socjalne"], ["008", "Archiwum"], ["010", "Pom. biurowe"], ["011", "Pom. biurowe"], ["012", "Pom. biurowe"], ["013", "Pom. biurowe"], ["014", "Pom. biurowe"], ["015", "Pom. biurowe"], ["017", "Pom. biurowe"], ["018", "Pom. biurowe"], ["019", "Pom. biurowe"], ["020", "Archiwum"], ["021", "Pom. biurowe"], ["022", "Pom. biurowe"], ["023", "Pom. biurowe"], ["024", "Pom. biurowe"], ["025", "Pom. biurowe"], ["026", "Pom. biurowe"], ["027", "Pom. socjalne"], ["028", "Archiwum"], ["K.029", "Kom. wewnętrzna"], ["K.030", "Kom. wewnętrzna"], ["K.031", "Korytarz"], ["K.032", "Korytarz"], ["K.033", "Przedsionek"], ["K.034", "Przedsionek"], ["KS.035", "Klatka schodowa"], ["W.037", "Winda"], ["W.038", "Winda"], ["KS.040", "Klatka schodowa"], ["041", "Pom. socjalne"], ["Ł.042", "WC"], ["Ł.043", "Prysznic"], ["044", "Pom. socjalne"], ["Ł.045", "WC m."], ["Ł.046", "Umywalnia męska"], ["T.047", "Pom. techniczne"], ["T.048", "Pom. techniczne"], ["Ł.049", "WC dla niepełnospr."], ["Ł.050", "Umywalnia damska"], ["Ł.051", "WC damski"], ["052", "Pom. socjalne"], ["053", "Pom. pomocnicze"], ["K.054", "Komunikacja wejściowa"], ["K.055", "Korytarz"]], "1": [["101", "Gabinet kwestora"], ["102", "Sekretariat kwestury"], ["103", "Pokój kierownika"], ["104", "Pokój kierownika"], ["105", "Pokój kierownika"], ["106", "Pomieszczenie biurowe"], ["107", "Pomieszczenie biurowe"], ["108", "Pomieszczenie biurowe"], ["109", "Pomieszczenie biurowe"], ["110", "Pomieszczenie biurowe"], ["111", "Pomieszczenie biurowe"], ["112", "Pomieszczenie biurowe"], ["113", "Pomieszczenie biurowe"], ["114", "Pomieszczenie biurowe"], ["115", "Pomieszczenie biurowe"], ["116", "Pomieszczenie biurowe"], ["117", "Pomieszczenie biurowe"], ["118", "Pomieszczenie biurowe"], ["119", "Pomieszczenie biurowe"], ["120", "Pomieszczenie biurowe"], ["121", "Pomieszczenie biurowe"], ["124", "Pomieszczenie biurowe"], ["125", "Pomieszczenie biurowe"], ["126", "Pomieszczenie biurowe"], ["127", "Pomieszczenie biurowe"], ["128", "Pomieszczenie biurowe"], ["129", "Pomieszczenie biurowe"], ["130", "Pomieszczenie biurowe"], ["132", "Pomieszczenie biurowe"], ["133", "Pomieszczenie biurowe"], ["134", "Pomieszczenie biurowe"], ["135", "Pom. socjalne"], ["136", "Pom. socjalne"], ["137", "Sala konferencyjna"], ["138", "Archiwum"], ["139", "Pom. na mat. biurowe"], ["140", "Sala konferencyjna"], ["141", "Sala konferencyjna"], ["142", "Pom. socjalne"], ["143", "Pom. socjalne"], ["K.144", "Korytarz"], ["K.145", "Korytarz"], ["K.146", "Korytarz"], ["KS.147", "Klatka schodowa"], ["W.149", "Winda"], ["W.150", "Winda"], ["KS.152", "Klatka schodowa"], ["153", "Pom. pomocnicze"], ["154", "Pom. socjalne"], ["Ł.155", "WC męski"], ["Ł.156", "Umywalnia męska"], ["T.157", "Pom. techniczne"], ["Ł.158", "WC dla niepełnospr."], ["Ł.159", "WC damskie"], ["Ł.160", "Umywalnia dam."], ["161", "Pom. pomocnicze"], ["162", "Pom. socjalne"]], "2": [["201", "Pomieszczenie biurowe"], ["202", "Pomieszczenie biurowe"], ["203", "Pomieszczenie biurowe"], ["204", "Pomieszczenie biurowe"], ["205", "Pomieszczenie biurowe"], ["206", "Pomieszczenie biurowe"], ["207", "Pomieszczenie biurowe"], ["208", "Pomieszczenie biurowe"], ["209", "Pomieszczenie biurowe"], ["210", "Pomieszczenie biurowe"], ["211", "Pomieszczenie"], ["212", "Pomieszczenie biurowe"], ["213", "Pomieszczenie biurowe"], ["214", "Pomieszczenie biurowe"], ["215", "Pomieszczenie biurowe"], ["216", "Pomieszczenie biurowe"], ["217", "Pomieszczenie biurowe"], ["218", "Pomieszczenie biurowe"], ["219", "Pomieszczenie biurowe"], ["220", "Pomieszczenie biurowe"], ["221", "Archiwum akt"], ["222", "Pomieszczenie biurowe"], ["223", "Pomieszczenie biurowe"], ["224", "Pomieszczenie biurowe"], ["225", "Pomieszczenie biurowe"], ["226", "Pomieszczenie biurowe"], ["227", "Pomieszczenie biurowe"], ["228", "Pomieszczenie"], ["229", "Pomieszczenie biurowe"], ["230", "Pomieszczenie biurowe"], ["231", "Pomieszczenie biurowe"], ["232", "Pomieszczenie biurowe"], ["233", "Pomieszczenie biurowe"], ["234", "Pomieszczenie biurowe"], ["235", "Pomieszczenie biurowe"], ["236", "Pom. socjalne"], ["237", "Pom. socjalne"], ["238", "Sala konferencyjna"], ["239.1", "Sala konferencyjna"], ["239.2", "Archiwum"], ["239.3", "Sala konferencyjna"], ["239.4", "Studio nagrań"], ["240", "Sala konferencyjna"], ["241", "Sala konferencyjna"], ["242", "Pom. socjalne"], ["243", "Pom. socjalne"], ["K.244", "Korytarz"], ["K.245", "Korytarz"], ["K.246", "Korytarz"], ["KS.247", "Klatka schodowa"], ["W.249", "Winda"], ["W.250", "Winda"], ["KS.252", "Klatka schodowa"], ["253", "Pom. dla matki karmiącej"], ["254", "Pomieszczenie socjalne"], ["Ł.255", "WC męski"], ["Ł.256", "Umywalnia męska"], ["T.257", "Pomieszczenie techniczne"], ["Ł.258", "WC dla niepełnospr."], ["Ł.259", "WC damski"], ["Ł.260", "Umywalnia dam."], ["261", "Pom. pomocnicze"], ["262", "Pomieszczenie socjalne"]], "3": [["301", "Poczekalnia"], ["302", "Sekretariat rektora"], ["303", "Gabinet rektora"], ["304", "Zespół hig.-sanit"], ["Ł.304a", "Zespół hig.-sanit."], ["306", "Sala konferencyjna"], ["307", "Pom. socjalne"], ["308", "Sala konferencyjna"], ["309", "Pom. socjalne"], ["310", "Sekretariat prorektorów"], ["311", "Gabinet prorektora"], ["312", "Zaplecze tech. sali"], ["313", "Gabinet prorektorów"], ["314", "Gabinet prorektorów"], ["315", "Gabinet prorektorów"], ["316", "Gabinet prorektorów"], ["Ł.317", "WC"], ["K.318", "Komunikacja wewnętrzna"], ["319", "Poczekalnia"], ["320", "Sekretariat kanclerza"], ["321", "Pomieszczenie socjalne"], ["322", "Gabinet kanclerza"], ["323", "Gab. zastepcy kanclerza"], ["324", "Gab. zastępcy kanclerza"], ["325", "Sala konferencyjna"], ["K.326", "Komunikacja wewnętrzna"], ["327", "Pomieszczenie biurowe"], ["328", "Pomieszczenie socjalne"], ["329", "Pomieszczenie biurowe"], ["329a", "Pomieszczenie biurowe"], ["330", "Sekretariat biura rektora"], ["331", "Gabinet kierownika biura"], ["K.332", "Korytarz"], ["K.333", "Korytarz"], ["KS.334", "Klatka schodowa"], ["W.336", "Winda"], ["W.337", "Winda"], ["KS.339", "Klatka schodowa"], ["T.341", "Pomieszczenie techniczne"], ["342", "Magazyn"], ["Ł.343", "Wc męskie"], ["Ł.344", "Umywalnia męska"], ["Ł.345", "Wc dla niepełnosprawnych"], ["346", "Pomieszczenie pomocnicze"], ["Ł.347", "Umywalnia damska"], ["Ł.348", "Wc damski"], ["349", "Pom. techniczne"], ["350", "Magazyn"]]};
+const ROOM_FIX = {"Ł.045":"WC męski","323":"Gab. zastępcy kanclerza","313":"Gabinet prorektora","314":"Gabinet prorektora","315":"Gabinet prorektora","316":"Gabinet prorektora","Ł.160":"Umywalnia damska","Ł.260":"Umywalnia damska","K.054":"Komunikacja wejściowa (wejście główne)"};
+const FLOORS=[{id:"-1",label:"Garaż (poziom −1)"},{id:"0",label:"Parter"},{id:"1",label:"I piętro"},{id:"2",label:"II piętro"},{id:"3",label:"III piętro"},{id:"x",label:"Teren zewnętrzny"}];
+const OUTSIDE=[["@wejscie","Wejście główne (na zewnątrz)"],["@tyl","Tył budynku"],["@wjazd","Wjazd do garażu"],["@chodnik","Chodniki wokół budynku"]];
+const KINDS=["Drzwi, zamki, klamki","Hydraulika (kran, WC, odpływ)","Elektryka, oświetlenie","Meble i wyposażenie","Suszarka, dozownik","Ściany, sufit, podłoga","Inne"];
+const WHO=[["v","Parter"],["n","I piętro"],["e","II piętro"],["k","III piętro"],["s","Garaż / teren"],["m","Kierownik obiektu"]];
+const OTHER="__other";
+const $=id=>document.getElementById(id);
+let team={}; try{ team=JSON.parse(localStorage.getItem("ekko-team")||"{}")||{}; }catch(e){}
+let sign=""; try{ sign=(JSON.parse(localStorage.getItem("ekko-a33-v2")||"{}").signName)||""; }catch(e){}
+let list=[]; try{ list=JSON.parse(localStorage.getItem("ekko-usterki-v1")||"[]")||[]; }catch(e){}
+let pref={}; try{ pref=JSON.parse(localStorage.getItem("ekko-usterki-pref")||"{}")||{}; }catch(e){}
+function saveList(){ try{ localStorage.setItem("ekko-usterki-v1", JSON.stringify(list.slice(0,200))); }catch(e){} }
+function savePref(){ try{ localStorage.setItem("ekko-usterki-pref", JSON.stringify(pref)); }catch(e){} }
+let urgent=false, photo=null;
+function whoLabel(k){ if(k==="m") return sign?("Kierownik obiektu "+sign):"Kierownik obiektu"; const n=(team[k]&&team[k].name)||""; const w=WHO.find(x=>x[0]===k); return n?`${n} (${w[1]})`:w[1]; }
+function roomsFor(f){ return f==="x"?OUTSIDE:(ROOMS[f]||[]).map(([c,n])=>[c,(ROOM_FIX[c]||n)]); }
+function place(){ const r=$("room").value; if(r===OTHER) return $("other").value.trim()||"miejsce do wskazania"; if(!r) return "miejsce do wskazania";
+  const it=roomsFor($("floor").value).find(x=>x[0]===r); if(r[0]==="@") return it?it[1]:r; if(/^\d/.test(r)) return "Pomieszczenie "+r+(it?" ("+it[1]+")":""); return r+(it?" "+it[1]:""); }
+function floorLabel(){ return FLOORS.find(f=>f.id===$("floor").value).label; }
+function nowStr(){ const d=new Date(); return d.toLocaleDateString("pl-PL",{day:"2-digit",month:"2-digit"})+" "+d.toLocaleTimeString("pl-PL",{hour:"2-digit",minute:"2-digit"}); }
+function text(){
+  const d=$("desc").value.trim()||"(opis)";
+  const L=["🔧 *Zgłoszenie usterki*"+(urgent?" ❗ PILNE":""),"📍 "+floorLabel()+" · "+place(),"🛠️ "+$("kind").value,"",d,"","Panie Sylwestrze, proszę o naprawę. Dziękuję 🙏","— "+whoLabel($("who").value)];
+  if(photo) L.splice(5,0,"📷 zdjęcie w załączniku");
+  return L.join("\n");
+}
+function fillRooms(){ const f=$("floor").value; $("room").innerHTML=`<option value="">Wybierz…</option>`+roomsFor(f).map(([c,n])=>`<option value="${c}">${c[0]==="@"?n:c+" · "+n}</option>`).join("")+`<option value="${OTHER}">Inne / wpisz ręcznie</option>`; $("otherWrap").hidden=true; }
+function render(){
+  const t=text(); $("msg").textContent=t; $("waLink").href="https://wa.me/?text="+encodeURIComponent(t);
+  let can=false; if(photo && navigator.canShare){ try{ can=navigator.canShare({files:[photo.file]}); }catch(e){} }
+  $("shareBtn").hidden=!can;
+  $("hint").textContent = photo && !can ? "Ta przeglądarka nie dołączy zdjęcia sama. Wyślij tekst, a zdjęcie dołącz w WhatsApp z galerii." : "WhatsApp otworzy listę czatów: wybierz grupę „Nowy Rektorat – Zespół porządkowy”.";
+  document.querySelectorAll(".seg2 button").forEach(b=>b.setAttribute("aria-pressed", (b.dataset.u==="1")===urgent));
+  renderPhoto(); renderList();
+}
+function renderPhoto(){ const box=$("ph"); box.innerHTML="";
+  if(photo){ const t=document.createElement("div"); t.className="thumb"; t.innerHTML=`<img alt="Zdjęcie usterki" src="${photo.url}"><button type="button" aria-label="Usuń zdjęcie">×</button>`; t.querySelector("button").onclick=()=>{ URL.revokeObjectURL(photo.url); photo=null; render(); }; box.appendChild(t); }
+  const lab=document.createElement("label"); lab.className="btn small photo-btn"; lab.textContent=photo?"📷 Zmień zdjęcie":"📷 Zrób zdjęcie usterki";
+  const inp=document.createElement("input"); inp.type="file"; inp.accept="image/*"; inp.setAttribute("capture","environment"); inp.setAttribute("aria-label","Zdjęcie");
+  inp.onchange=()=>{ const f=inp.files&&inp.files[0]; if(!f) return; if(photo) URL.revokeObjectURL(photo.url); photo={raw:f, url:URL.createObjectURL(f)}; photo.file=f; render(); };
+  lab.appendChild(inp); box.appendChild(lab); }
+function stamp(){ return new Promise(res=>{ const img=new Image(); img.onload=()=>{ const m=1600, sc=Math.min(1,m/Math.max(img.width,img.height)); const W=Math.round(img.width*sc), H=Math.round(img.height*sc);
+  const fs=Math.max(18,Math.round(W/26)), pad=Math.round(fs*.7), lh=Math.round(fs*1.3); const c=document.createElement("canvas"), x=c.getContext("2d"); x.font=`600 ${fs}px "IBM Plex Sans",Arial,sans-serif`;
+  const wrap=t=>{ const o=[]; let l=""; t.split(/\s+/).forEach(w=>{ const tr=l?l+" "+w:w; if(x.measureText(tr).width>W-2*pad && l){ o.push(l); l=w; } else l=tr; }); if(l) o.push(l); return o; };
+  const lines=[...wrap("🔧 USTERKA"+(urgent?" · PILNE":"")+" · "+floorLabel()+" · "+place()), ...wrap($("desc").value.trim()||"(opis)"), ...wrap("A33 · "+nowStr())];
+  const band=pad*2+lines.length*lh; c.width=W; c.height=H+band; x.drawImage(img,0,0,W,H); x.fillStyle="#18233a"; x.fillRect(0,H,W,band); x.fillStyle="#a15c00"; x.fillRect(0,H,W,Math.max(4,Math.round(fs/5)));
+  x.fillStyle="#fff"; x.textBaseline="top"; lines.forEach((l,i)=>{ x.font=`${i===0?700:500} ${fs}px "IBM Plex Sans",Arial,sans-serif`; x.fillText(l,pad,H+pad+i*lh); });
+  c.toBlob(b=>res(b),"image/jpeg",.85); }; img.onerror=()=>res(photo.raw); img.src=photo.url; }); }
+function record(){ list.unshift({id:Date.now(), t:nowStr(), where:floorLabel()+" · "+place(), kind:$("kind").value, desc:$("desc").value.trim(), urgent, done:false}); saveList();
+  $("desc").value=""; urgent=false; if(photo){ URL.revokeObjectURL(photo.url); photo=null; } }
+async function share(){ const t=text(); const b=await stamp(); const f=new File([b],"A33_usterka.jpg",{type:"image/jpeg"});
+  try{ await navigator.share({text:t, files:[f]}); record(); render(); toast("Zgłoszenie przekazane"); }
+  catch(e){ if(e && e.name==="AbortError") return; toast("Nie udało się. Użyj przycisku z tekstem."); $("shareBtn").hidden=true; } }
+function renderList(){ const open=list.filter(x=>!x.done).length; $("openCnt").textContent=open?`(${open})`:"";
+  $("list").innerHTML = list.length ? "" : `<p class="hint" style="padding:0 16px">Brak zgłoszeń.</p>`;
+  list.forEach(u=>{ const d=document.createElement("div"); d.className="prod usterka"+(u.done?" done":"");
+    d.innerHTML=`<div class="ic" aria-hidden="true">${u.done?"✅":(u.urgent?"❗":"🔧")}</div><div><b>${u.where}</b><small>${u.t} · ${u.kind}</small><div class="desc">${(u.desc||"").replace(/[<&]/g,c=>c==="<"?"&lt;":"&amp;")}</div></div>
+      <button class="btn small" type="button">${u.done?"Otwórz":"Naprawione"}</button>`;
+    d.querySelector("button").onclick=()=>{ u.done=!u.done; u.doneAt=u.done?nowStr():""; saveList(); renderList(); };
+    $("list").appendChild(d); }); }
+let tt; function toast(m){ const t=$("toast"); t.textContent=m; t.hidden=false; clearTimeout(tt); tt=setTimeout(()=>t.hidden=true,2400); }
+
+$("who").innerHTML=WHO.map(([k])=>`<option value="${k}">${whoLabel(k)}</option>`).join(""); $("who").value=pref.who||"m";
+$("floor").innerHTML=FLOORS.map(f=>`<option value="${f.id}">${f.label}</option>`).join(""); $("floor").value=pref.floor||"0";
+$("kind").innerHTML=KINDS.map(k=>`<option>${k}</option>`).join("");
+fillRooms();
+$("who").onchange=()=>{ pref.who=$("who").value; savePref(); render(); };
+$("floor").onchange=()=>{ pref.floor=$("floor").value; savePref(); fillRooms(); render(); };
+$("room").onchange=()=>{ $("otherWrap").hidden=$("room").value!==OTHER; render(); };
+["other","desc"].forEach(id=>$(id).oninput=render); $("kind").onchange=render;
+document.querySelectorAll(".seg2 button").forEach(b=>b.onclick=()=>{ urgent=b.dataset.u==="1"; render(); });
+$("shareBtn").onclick=share;
+$("waLink").addEventListener("click",()=>{ record(); setTimeout(render,300); });
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b)); ["new","list"].forEach(t=>$("t-"+t).hidden=t!==b.dataset.t); render(); });
+render();
+if("serviceWorker" in navigator && location.protocol==="https:"){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+</script>
+</body>
+</html>
