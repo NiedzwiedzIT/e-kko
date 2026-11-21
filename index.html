@@ -119,7 +119,7 @@ details.team summary small{color:var(--muted);font-size:13px}details.team[open]{
     <div class="eyebrow">E-KKO · Budynek A33 · Nowy Rektorat</div>
     <h1>Karta Kontroli Obiektu</h1>
     <p class="sub">Obchód, ocena punktów kontroli, zadania z numerem pomieszczenia i zdjęciem, raport na WhatsApp.</p>
-    <button class="btn small" id="newTop" type="button">↻ Nowa kontrola</button>
+    <div class="row" style="width:100%;flex-wrap:nowrap"><button class="btn small" id="newTop" type="button">↻ Nowa kontrola</button><a class="btn small" href="srodki.html" style="text-decoration:none">🧴 Środki czystości</a></div>
   </header>
 
   <details class="card team" id="team">
@@ -241,7 +241,7 @@ const FLOORS = [
 ];
 const ROOM_OWNER = {"K.054":"k"};
 function ownerOf(c){ if(!c) return null; if(ROOM_OWNER[c]) return ROOM_OWNER[c]; if(/^W\.|^W\.-/.test(c)) return "s"; return null; }
-const POINTS = ["Czystość podłóg","Czystość korytarzy","Czystość schodów i poręczy","Czystość sanitariatów","Czystość umywalek i luster","Uzupełnienie papieru toaletowego","Uzupełnienie mydła i ręczników","Opróżnienie koszy na odpady","Czystość biur, gabinetów i sal","Czystość drzwi i klamek","Usunięcie kurzu","Czystość parapetów","Czystość wejść i wind","Czystość pomieszczeń socjalnych","Stan techniczny wyposażenia"];
+const POINTS = ["Czystość podłóg","Czystość korytarzy","Czystość schodów i poręczy","Czystość sanitariatów","Czystość umywalek i luster","Opróżnienie pojemników na wodę w suszarkach do rąk","Uzupełnienie papieru toaletowego","Uzupełnienie mydła i ręczników","Opróżnienie koszy na odpady","Czystość biur, gabinetów i sal","Czystość drzwi i klamek","Usunięcie kurzu","Czystość parapetów","Czystość wejść i wind","Czystość pomieszczeń socjalnych","Stan techniczny wyposażenia"];
 // Garaż (poziom −1): według rzutu są tam hala garażowa HG.-112 i przedsionek wind W.-108 (oraz klatki schodowe, windy, pom. techniczne)
 const POINTS_GARAGE = ["Czystość posadzki w hali garażowej","Czystość przedsionka do wind","Czystość wind"];
 // Teren zewnętrzny (pracownik gospodarczy). Punkty sezonowe: poza sezonem zaznacz „Nie dotyczy”.

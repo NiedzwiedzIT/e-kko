@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#18233a">
+<meta name="robots" content="noindex">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Środki czystości A33</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Ten sam arkusz co karta kontroli: jedna kolumna, karty, liczby pismem technicznym */
+:root{
+  --bg:#eef1f5; --paper:#ffffff; --ink:#18233a; --muted:#5d6779; --line:#d6dce5;
+  --accent:#1f56b3; --accent-ink:#ffffff; --accent-soft:#e3ebf9;
+  --ok:#1d7a47; --ok-soft:#e1f3e8; --warn:#a15c00; --warn-soft:#fdf0dc; --fix:#c2352a; --fix-soft:#fbe7e5;
+  --f-head:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#0f141d; --paper:#18202d; --ink:#e7ecf4; --muted:#9aa5b8; --line:#2c3748;
+  --accent:#6f9cf0; --accent-ink:#0b1220; --accent-soft:#1d2a44;
+  --ok:#5cc58a; --ok-soft:#163324; --warn:#f0b35c; --warn-soft:#3a2a12; --fix:#f07a6e; --fix-soft:#3a1d1b; color-scheme:dark}}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 96px}
+.wrap{max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{padding-block:18px 4px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--f-head);font-size:30px;line-height:1.1;margin:0;text-wrap:balance}
+h2{font-family:var(--f-head);font-size:20px;margin:0}
+.sub{color:var(--muted);font-size:14px;margin:0}
+a.back{color:var(--accent);font-weight:600;text-decoration:none;font-size:14px}
+.tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding-block:8px;z-index:5}
+.tabs button{font:inherit;font-weight:600;font-size:14px;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:8px;padding:10px 4px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+section.card{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;font-weight:600;color:var(--muted);min-width:0}
+input,select,textarea{font:inherit;font-size:16px;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:10px 12px;width:100%;min-width:0}
+textarea{min-height:56px;resize:vertical}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.list{display:flex;flex-direction:column;margin:0 -16px}
+.prod{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}
+.prod .ic{width:44px;height:44px;border-radius:8px;background:var(--accent-soft);display:grid;place-items:center;font-size:22px}
+.prod b{display:block;font-weight:600;line-height:1.25}
+.prod small{color:var(--muted);font-size:13px}
+.qty{display:flex;align-items:center;gap:6px}
+.qty button{width:40px;height:40px;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-size:20px;font-weight:600;cursor:pointer;line-height:1}
+.qty output{min-width:28px;text-align:center;font-family:var(--f-mono);font-size:18px;font-variant-numeric:tabular-nums}
+.prod.picked{background:var(--accent-soft)}
+.stock{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:20px;text-align:right;line-height:1.1}
+.stock small{display:block;font-family:var(--f-body);font-size:12px}
+.pill{display:inline-block;font-size:12px;font-weight:600;border-radius:999px;padding:2px 8px;margin-top:4px}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}.pill.low{background:var(--warn-soft);color:var(--warn)}.pill.out{background:var(--fix-soft);color:var(--fix)}
+.btn{font:inherit;font-weight:600;border-radius:8px;padding:11px 14px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;text-align:center}
+.btn.primary{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn.accent{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.small{padding:7px 10px;font-size:14px}
+.actions{display:flex;flex-direction:column;gap:8px}
+.row{display:flex;gap:10px;flex-wrap:wrap}.row>*{flex:1 1 140px;min-width:0}
+pre.msg{white-space:pre-wrap;word-break:break-word;font-family:var(--f-body);font-size:15px;background:var(--bg);border:1px dashed var(--line);border-radius:8px;padding:12px;margin:0}
+.hint{font-size:13px;color:var(--muted);margin:0}
+.note{background:var(--warn-soft);color:var(--ink);border-radius:8px;padding:10px 12px;font-size:14px}
+.edit{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;grid-column:1/-1}
+.hist{display:flex;flex-direction:column;gap:6px;font-size:14px}
+.hist div{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:6px}
+.hist span:last-child{font-family:var(--f-mono);white-space:nowrap}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-size:14px;z-index:20}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="back" href="./">← Karta kontroli</a>
+    <div class="eyebrow">E-KKO · Budynek A33 · prototyp</div>
+    <h1>Środki czystości</h1>
+    <p class="sub">Zamówienie z piętra, stan magazynku i lista na koniec miesiąca.</p>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" data-t="order" aria-selected="true">Zamówienie</button>
+    <button role="tab" data-t="stock" aria-selected="false">Magazyn</button>
+    <button role="tab" data-t="month" aria-selected="false">Do zamówienia</button>
+  </div>
+
+  <!-- ZAMÓWIENIE -->
+  <section class="card" id="t-order">
+    <h2>Zamówienie do magazynku</h2>
+    <label class="f">Kto zamawia
+      <select id="who"></select>
+    </label>
+    <div class="list" id="orderList"></div>
+    <label class="f">Uwagi (opcjonalnie)<textarea id="orderNote" placeholder="np. potrzebne na jutro rano"></textarea></label>
+    <pre class="msg" id="orderMsg"></pre>
+    <div class="actions">
+      <a class="btn primary" id="orderWa" href="https://wa.me/" target="_blank" rel="noopener">Wyślij zamówienie na WhatsApp</a>
+      <button class="btn" id="orderIssue" type="button">Wydane z magazynku (odejmij ze stanu)</button>
+      <p class="hint">Wyślij do pana Sylwestra albo do grupy. Gdy towar zostanie wydany, kliknij „Wydane”, żeby stan magazynku się zmniejszył.</p>
+    </div>
+  </section>
+
+  <!-- MAGAZYN -->
+  <section class="card" id="t-stock" hidden>
+    <h2>Stan magazynku</h2>
+    <p class="note" id="sampleNote">Stany są przykładowe. Wpisz prawdziwe ilości: kliknij produkt i popraw „Stan teraz”.</p>
+    <div class="list" id="stockList"></div>
+    <h2>Ostatnie ruchy</h2>
+    <div class="hist" id="hist"></div>
+  </section>
+
+  <!-- KONIEC MIESIĄCA -->
+  <section class="card" id="t-month" hidden>
+    <h2>Do zamówienia na koniec miesiąca</h2>
+    <p class="hint">Lista uzupełnia magazynek do „pełnego stanu” ustawionego przy każdym produkcie.</p>
+    <pre class="msg" id="monthMsg"></pre>
+    <div class="actions">
+      <a class="btn primary" id="monthWa" href="https://wa.me/" target="_blank" rel="noopener">Wyślij listę na WhatsApp</a>
+      <button class="btn" id="monthCopy" type="button">Kopiuj listę</button>
+      <button class="btn accent" id="delivery" type="button">Przyszła dostawa (dodaj całą listę do stanu)</button>
+    </div>
+  </section>
+
+  <p class="hint">Prototyp: stan magazynku jest zapisany tylko w tym telefonie. Wspólny stan dla wszystkich telefonów wymaga wspólnego miejsca na dane.</p>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+// Produkty ze zdjęć kierownika. full = pełny stan magazynku, min = poniżej tego ostrzeżenie.
+const PRODUCTS = [
+  {id:"papier", ic:"🧻", name:"Papier toaletowy, duże rolki", unit:"zgrzewka", units:["zgrzewka","zgrzewki","zgrzewek"], full:15, min:4, sample:3},
+  {id:"recznik", ic:"🤲", name:"Ręczniki Katrin Zig Zag 2 (składane)", unit:"karton", units:["karton","kartony","kartonów"], full:10, min:3, sample:6},
+  {id:"clin", ic:"🪟", name:"Clin do szyb i luster, 500 ml", unit:"szt.", units:["szt.","szt.","szt."], full:12, min:3, sample:8},
+  {id:"swish", ic:"🪑", name:"Swish Office Clean do mebli, 1 l", unit:"szt.", units:["szt.","szt.","szt."], full:10, min:3, sample:2},
+  {id:"proszek", ic:"🧺", name:"Proszek do prania", unit:"opak.", units:["opak.","opak.","opak."], full:4, min:1, sample:0}
+];
+const AREAS = [
+  {k:"v", label:"Parter"}, {k:"n", label:"I piętro"}, {k:"e", label:"II piętro"}, {k:"k", label:"III piętro"}, {k:"s", label:"Garaż / teren"}
+];
+const $ = id => document.getElementById(id);
+const LS = "ekko-srodki-v1";
+let team = {}; try{ team = JSON.parse(localStorage.getItem("ekko-team")||"{}")||{}; }catch(e){}
+let st;
+function load(){ try{ st = JSON.parse(localStorage.getItem(LS)||"null"); }catch(e){ st=null; }
+  if(!st){ st={sample:true, stock:{}, cfg:{}, hist:[], who:"e"}; PRODUCTS.forEach(p=>st.stock[p.id]=p.sample); } }
+function save(){ try{ localStorage.setItem(LS, JSON.stringify(st)); }catch(e){} }
+function cfg(p){ return Object.assign({full:p.full, min:p.min}, st.cfg[p.id]||{}); }
+function plural(p,n){ const a=Math.abs(n)%100, b=a%10; if(n===1) return p.units[0]; if(b>=2&&b<=4&&!(a>=12&&a<=14)) return p.units[1]; return p.units[2]; }
+function q(p,n){ return n+" "+plural(p,n); }
+function whoName(k){ const a=AREAS.find(x=>x.k===k); const n=(team[k]&&team[k].name)||""; return n ? `${n} (${a.label})` : a.label; }
+function nowStr(){ const d=new Date(); return d.toLocaleDateString("pl-PL",{day:"2-digit",month:"2-digit"})+" "+d.toLocaleTimeString("pl-PL",{hour:"2-digit",minute:"2-digit"}); }
+let order = {};
+
+function renderOrder(){
+  $("who").innerHTML = AREAS.map(a=>`<option value="${a.k}">${whoName(a.k)}</option>`).join("");
+  $("who").value = st.who||"e";
+  $("orderList").innerHTML="";
+  PRODUCTS.forEach(p=>{
+    const n=order[p.id]||0;
+    const d=document.createElement("div"); d.className="prod"+(n?" picked":"");
+    d.innerHTML=`<div class="ic" aria-hidden="true">${p.ic}</div><div><b>${p.name}</b><small>${p.unit}</small></div>
+      <div class="qty"><button type="button" aria-label="Mniej">−</button><output>${n}</output><button type="button" aria-label="Więcej">+</button></div>`;
+    const [minus,plus]=d.querySelectorAll("button");
+    minus.onclick=()=>{ order[p.id]=Math.max(0,(order[p.id]||0)-1); renderOrder(); };
+    plus.onclick=()=>{ order[p.id]=(order[p.id]||0)+1; renderOrder(); };
+    $("orderList").appendChild(d);
+  });
+  const txt=orderText();
+  $("orderMsg").textContent=txt;
+  $("orderWa").href="https://wa.me/?text="+encodeURIComponent(txt);
+  const any=PRODUCTS.some(p=>order[p.id]);
+  $("orderIssue").disabled=!any; $("orderWa").style.opacity=any?1:.5;
+}
+function orderText(){
+  const L=["🧴 *ZAMÓWIENIE ŚRODKÓW CZYSTOŚCI*", "🏢 A33 · 📅 "+nowStr(), "👤 "+whoName($("who").value||st.who||"e"), ""];
+  const items=PRODUCTS.filter(p=>order[p.id]);
+  if(!items.length) L.push("_(wybierz produkty)_");
+  items.forEach(p=>L.push("• "+p.name+" – "+q(p,order[p.id])));
+  const note=$("orderNote").value.trim(); if(note){ L.push(""); L.push("📝 "+note); }
+  L.push(""); L.push("Proszę o wydanie z magazynku. Dziękuję!");
+  return L.join("\n");
+}
+
+function renderStock(){
+  $("sampleNote").hidden=!st.sample;
+  $("stockList").innerHTML="";
+  PRODUCTS.forEach(p=>{
+    const c=cfg(p), n=st.stock[p.id]||0;
+    const cls = n<=0 ? "out" : n<c.min ? "low" : "ok";
+    const lab = n<=0 ? "brak" : n<c.min ? "kończy się" : "w porządku";
+    const d=document.createElement("div"); d.className="prod";
+    d.innerHTML=`<div class="ic" aria-hidden="true">${p.ic}</div><div><b>${p.name}</b><span class="pill ${cls}">${lab}</span></div>
+      <div class="stock">${n}<small>${plural(p,n)}</small></div>
+      <div class="edit" hidden>
+        <label class="f">Stan teraz<input type="number" inputmode="numeric" min="0" data-f="now" value="${n}"></label>
+        <label class="f">Pełny stan<input type="number" inputmode="numeric" min="0" data-f="full" value="${c.full}"></label>
+        <label class="f">Ostrzeż poniżej<input type="number" inputmode="numeric" min="0" data-f="min" value="${c.min}"></label>
+        <button class="btn small accent" type="button" style="grid-column:1/-1">Zapisz</button>
+      </div>`;
+    const ed=d.querySelector(".edit");
+    d.querySelector("b").parentElement.style.cursor="pointer";
+    d.querySelector("b").parentElement.onclick=()=>{ ed.hidden=!ed.hidden; };
+    d.querySelector(".stock").onclick=()=>{ ed.hidden=!ed.hidden; };
+    ed.querySelector("button").onclick=()=>{
+      const v=f=>Math.max(0,parseInt(ed.querySelector(`[data-f=${f}]`).value||"0",10)||0);
+      const now=v("now"); if(now!==n) st.hist.unshift({t:nowStr(), txt:`Korekta: ${p.name}`, d:now-n, u:p.id});
+      st.stock[p.id]=now; st.cfg[p.id]={full:v("full"), min:v("min")}; st.sample=false; save(); renderAll(); toast("Zapisano");
+    };
+    $("stockList").appendChild(d);
+  });
+  $("hist").innerHTML = st.hist.slice(0,12).map(h=>{ const p=PRODUCTS.find(x=>x.id===h.u); return `<div><span>${h.t} · ${h.txt}</span><span>${h.d>0?"+":""}${h.d} ${p?plural(p,Math.abs(h.d)):""}</span></div>`; }).join("") || `<p class="hint">Brak ruchów. Wydania z zakładki „Zamówienie” pojawią się tutaj.</p>`;
+}
+
+function monthList(){ return PRODUCTS.map(p=>({p, n:Math.max(0, cfg(p).full-(st.stock[p.id]||0))})).filter(x=>x.n>0); }
+function monthText(){
+  const d=new Date(), m=d.toLocaleDateString("pl-PL",{month:"long",year:"numeric"});
+  const L=["📦 *ŚRODKI CZYSTOŚCI DO ZAMÓWIENIA*","🏢 A33 · "+m,""];
+  const list=monthList();
+  if(!list.length) L.push("Magazynek pełny, nic nie trzeba zamawiać. ✅");
+  list.forEach(x=>L.push("• "+x.p.name+" – "+q(x.p,x.n)+"  (jest: "+(st.stock[x.p.id]||0)+")"));
+  L.push(""); L.push("Kierownik obiektu"+((localStorage.getItem("ekko-a33-v2")&&(()=>{try{const s=JSON.parse(localStorage.getItem("ekko-a33-v2"));return s.signName?" "+s.signName:"";}catch(e){return "";}})())||""));
+  return L.join("\n");
+}
+function renderMonth(){ const t=monthText(); $("monthMsg").textContent=t; $("monthWa").href="https://wa.me/?text="+encodeURIComponent(t); }
+
+function renderAll(){ renderOrder(); renderStock(); renderMonth(); }
+let tt; function toast(m){ const t=$("toast"); t.textContent=m; t.hidden=false; clearTimeout(tt); tt=setTimeout(()=>t.hidden=true,2400); }
+
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected", x===b));
+  ["order","stock","month"].forEach(t=>$("t-"+t).hidden = t!==b.dataset.t);
+  renderAll();
+});
+$("who").onchange=e=>{ st.who=e.target.value; save(); renderOrder(); };
+$("orderNote").oninput=renderOrder;
+$("orderIssue").onclick=()=>{
+  const who=whoName($("who").value);
+  PRODUCTS.forEach(p=>{ const n=order[p.id]; if(n){ st.stock[p.id]=Math.max(0,(st.stock[p.id]||0)-n); st.hist.unshift({t:nowStr(), txt:`Wydano: ${who}`, d:-n, u:p.id}); } });
+  st.hist=st.hist.slice(0,100); order={}; $("orderNote").value=""; save(); renderAll(); toast("Odjęto ze stanu magazynku");
+};
+$("monthCopy").onclick=async()=>{ try{ await navigator.clipboard.writeText(monthText()); toast("Skopiowano listę"); }catch(e){ toast("Zaznacz tekst i skopiuj ręcznie"); } };
+$("delivery").onclick=()=>{ const list=monthList(); if(!list.length){ toast("Nic do dodania"); return; }
+  list.forEach(x=>{ st.stock[x.p.id]=(st.stock[x.p.id]||0)+x.n; st.hist.unshift({t:nowStr(), txt:"Dostawa", d:x.n, u:x.p.id}); });
+  st.sample=false; save(); renderAll(); toast("Dodano dostawę do stanu"); };
+
+load(); renderAll();
+if("serviceWorker" in navigator && location.protocol==="https:"){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
+</script>
+</body>
+</html>
