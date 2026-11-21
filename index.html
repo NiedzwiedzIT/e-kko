@@ -193,7 +193,7 @@ details.team summary small{color:var(--muted);font-size:13px}details.team[open]{
       <li>Przy piętrze bez uwag raport dodaje imienne podziękowanie, losowane z kilku wersji. Przycisk „Inne słowa podziękowań” zmienia losowanie.</li>
       <li>W raporcie pojawiają się pozycje OK i do poprawy. „Nie dotyczy” i niesprawdzone są pomijane.</li>
       <li>Karta nie wysyła niczego sama. Przygotowuje wiadomość, a Ty wybierasz grupę w WhatsApp.</li>
-      <li>Wpisy zostają w tym telefonie do kliknięcia „Nowa kontrola”. Zdjęcia znikają po zamknięciu strony.</li>
+      <li>Każde otwarcie aplikacji zaczyna nową, pustą kontrolę (dzisiejsza data). Zespół i podpis zostają. Zdjęcia znikają po zamknięciu aplikacji.</li>
     </ul>
   </details>
 </div>
@@ -596,20 +596,13 @@ $("confirmYes").onclick=()=>{ Object.values(photos).flat().forEach(p=>URL.revoke
   state.example=false; const keep={date:state.date, due:state.due, floor:state.floor, mode:state.mode, signName:state.signName, thanks:state.thanks}; state=blank(keep.floor); state.date=keep.date; state.due=keep.due; state.mode=keep.mode||"all"; if(keep.signName!==undefined) state.signName=keep.signName; state.thanks=keep.thanks!==false; save(); $("confirmBox").hidden=true; renderAll(); scrollTo({top:0}); toast("Nowa kontrola gotowa"); };
 
 load();
-// Przykład na start (tylko gdy nic nie zapisano): II piętro, jak w opisie projektu
-Object.keys(state.floors).forEach(fid=>{ if(state.floors[fid].points.length!==pointsFor(fid).length) delete state.floors[fid]; });
-if(!Object.keys(state.floors).some(floorStarted)){
-  state.floor="2";
-  [0,1,3,7].forEach(i=>cur().points[i].s="ok");
-  cur().points[10]={s:"fix", entries:[{id:uid++, room:"225", other:"", desc:"usunąć kurz z biurek i szafek", due:""}]};
-  cur().points[9]={s:"fix", entries:[{id:uid++, room:"227", other:"", desc:"umyć drzwi i klamki", due:""}]};
-  state.example=true;
-  state.floors["0"]=blankFloor("0");
-  state.floors["0"].points[0].s="ok";
-  state.floors["0"].points[12]={s:"fix", entries:[{id:uid++, room:"K.054", other:"", desc:"wytrzeć ślady błota przy drzwiach wejściowych", due:""}]};
-  state.floors["-1"]=blankFloor("-1");
-  state.floors["-1"].points.forEach(p=>p.s="ok");
-}
+// Każde otwarcie aplikacji = nowa, pusta kontrola. Zespół, podpis i ustawienia zostają.
+// sessionStorage przeżywa przeładowanie strony w trakcie obchodu (np. po zrobieniu zdjęcia aparatem),
+// ale znika po zamknięciu aplikacji, więc wtedy zaczynamy od nowa.
+(function(){ let fresh=true; try{ fresh=!sessionStorage.getItem("ekko-open"); sessionStorage.setItem("ekko-open","1"); }catch(e){}
+  if(fresh){ const keep={due:state.due||"12:00", mode:state.mode||"all", signName:state.signName||"", thanks:state.thanks!==false};
+    state=blank("0"); state.due=keep.due; state.mode=keep.mode; state.signName=keep.signName; state.thanks=keep.thanks; save(); } })();
+Object.keys(state.floors).forEach(fid=>{ if(state.floors[fid].points.length!==pointsFor(fid).length) state.floors[fid]=blankFloor(fid); });
 renderAll(); renderTeam();
 if("serviceWorker" in navigator && location.protocol==="https:"){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
 </script>
