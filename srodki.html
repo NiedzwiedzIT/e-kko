@@ -70,52 +70,61 @@ pre.msg{white-space:pre-wrap;word-break:break-word;font-family:var(--f-body);fon
 .hist div{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:6px}
 .hist span:last-child{font-family:var(--f-mono);white-space:nowrap}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(20px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-size:14px;z-index:20}
+.tabs.four{grid-template-columns:repeat(4,1fr)}.tabs.four button{font-size:13px;padding:10px 2px}
+.prod.order{align-items:start}.prod .desc{font-size:14px;margin-top:4px}
+button:disabled{opacity:.5;cursor:default}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <a class="back" href="./">← Karta kontroli</a>
-    <div class="eyebrow">E-KKO · Budynek A33 · prototyp</div>
+    <div class="eyebrow">E-KKO · Budynek A33</div>
     <h1>Środki czystości</h1>
-    <p class="sub">Zamówienie z piętra, stan magazynku i lista na koniec miesiąca.</p>
+    <p class="sub" id="mode"></p>
   </header>
 
-  <div class="tabs" role="tablist">
-    <button role="tab" data-t="order" aria-selected="true">Zamówienie</button>
+  <label class="f">Kto używa tego telefonu<select id="who"></select></label>
+
+  <div class="tabs four" role="tablist">
+    <button role="tab" data-t="order" aria-selected="true">Zamów</button>
+    <button role="tab" data-t="issue" aria-selected="false">Do wydania <span id="issueCnt"></span></button>
     <button role="tab" data-t="stock" aria-selected="false">Magazyn</button>
     <button role="tab" data-t="month" aria-selected="false">Do zamówienia</button>
   </div>
 
-  <!-- ZAMÓWIENIE -->
+  <!-- ZAMÓW -->
   <section class="card" id="t-order">
     <h2>Zamówienie do magazynku</h2>
-    <label class="f">Kto zamawia
-      <select id="who"></select>
-    </label>
     <div class="list" id="orderList"></div>
-    <label class="f">Na kiedy
-      <select id="when"></select>
-    </label>
-    <label class="f">Uwagi (opcjonalnie)<textarea id="orderNote" placeholder="np. potrzebne na jutro rano"></textarea></label>
+    <label class="f">Na kiedy<select id="when"></select></label>
+    <label class="f">Uwagi (opcjonalnie)<textarea id="orderNote" placeholder="np. potrzebne rano"></textarea></label>
     <pre class="msg" id="orderMsg"></pre>
     <div class="actions">
-      <a class="btn primary" id="orderWa" href="https://wa.me/" target="_blank" rel="noopener">Wyślij zamówienie na grupę WhatsApp</a>
-      <button class="btn" id="orderIssue" type="button">Wydane z magazynku (odejmij ze stanu)</button>
-      <p class="hint">WhatsApp otworzy listę czatów: wybierz grupę „Nowy Rektorat – Zespół porządkowy”. Osoba prowadząca magazynek: gdy zobaczysz zamówienie w grupie, wybierz to piętro, zaznacz te same ilości i kliknij „Wydane”.</p>
+      <button class="btn primary" id="orderSend" type="button">Wyślij zamówienie do grupy</button>
+      <p class="hint">WhatsApp otworzy listę czatów: wybierz grupę „Nowy Rektorat – Zespół porządkowy”.</p>
     </div>
+  </section>
+
+  <!-- DO WYDANIA (pan Sylwester) -->
+  <section class="card" id="t-issue" hidden>
+    <h2>Zamówienia do wydania</h2>
+    <p class="hint">Dla pana Sylwestra: po wydaniu kliknij „Wydane”. Stan magazynku zmniejszy się sam.</p>
+    <div class="list" id="issueList"></div>
+    <h2>Ostatnio wydane</h2>
+    <div class="hist" id="issuedList"></div>
   </section>
 
   <!-- MAGAZYN -->
   <section class="card" id="t-stock" hidden>
     <h2>Stan magazynku</h2>
-    <p class="note" id="sampleNote">Stany są przykładowe. Wpisz prawdziwe ilości: kliknij produkt i popraw „Stan teraz”.</p>
+    <p class="hint">Kliknij produkt, żeby poprawić stan, pełny stan albo próg ostrzeżenia.</p>
     <div class="list" id="stockList"></div>
     <h2>Ostatnie ruchy</h2>
     <div class="hist" id="hist"></div>
   </section>
 
-  <!-- KONIEC MIESIĄCA -->
+  <!-- DO ZAMÓWIENIA -->
   <section class="card" id="t-month" hidden>
     <h2>Do zamówienia na koniec miesiąca</h2>
     <p class="hint">Lista uzupełnia magazynek do „pełnego stanu” ustawionego przy każdym produkcie.</p>
@@ -126,143 +135,126 @@ pre.msg{white-space:pre-wrap;word-break:break-word;font-family:var(--f-body);fon
       <button class="btn accent" id="delivery" type="button">Przyszła dostawa (dodaj całą listę do stanu)</button>
     </div>
   </section>
-
-  <p class="hint">Prototyp: stan magazynku jest zapisany tylko w tym telefonie. Wspólny stan dla wszystkich telefonów wymaga wspólnego miejsca na dane.</p>
 </div>
 <div class="toast" id="toast" hidden></div>
-
+<script src="baza.js"></script>
 <script>
-// Produkty ze zdjęć kierownika. full = pełny stan magazynku, min = poniżej tego ostrzeżenie.
-const PRODUCTS = [
-  {id:"papier", ic:"🧻", name:"Papier toaletowy, duże rolki", unit:"zgrzewka", units:["zgrzewka","zgrzewki","zgrzewek"], full:15, min:4, sample:3},
-  {id:"recznik", ic:"🤲", name:"Ręczniki Katrin Zig Zag 2 (składane)", unit:"karton", units:["karton","kartony","kartonów"], full:10, min:3, sample:6},
-  {id:"clin", ic:"🪟", name:"Clin do szyb i luster, 500 ml", unit:"szt.", units:["szt.","szt.","szt."], full:12, min:3, sample:8},
-  {id:"swish", ic:"🪑", name:"Swish Office Clean do mebli, 1 l", unit:"szt.", units:["szt.","szt.","szt."], full:10, min:3, sample:2},
-  {id:"proszek", ic:"🧺", name:"Proszek do prania", unit:"opak.", units:["opak.","opak.","opak."], full:4, min:1, sample:0},
-  {id:"pisuar", ic:"🚹", name:"Wkłady do pisuarów", unit:"szt.", units:["szt.","szt.","szt."], full:20, min:6, sample:10},
-  {id:"kwiatki", ic:"🌸", name:"Żelowe kwiatki do WC", unit:"opak.", units:["opak.","opak.","opak."], full:15, min:4, sample:5},
-  {id:"worekodk", ic:"🌀", name:"Worki do odkurzacza", unit:"szt.", units:["szt.","szt.","szt."], full:20, min:5, sample:12},
-  {id:"drzwi", ic:"🚪", name:"Płyn do drzwi", unit:"butelka", units:["butelka","butelki","butelek"], full:8, min:2, sample:3},
-  {id:"worki20", ic:"🗑️", name:"Worki na śmieci 20 l", unit:"rolka", units:["rolka","rolki","rolek"], full:30, min:8, sample:14}
-];
-const WHEN = [["","Bez pośpiechu"],["dziś","Na dziś"],["jutro","Na jutro"],["poniedziałek","Na poniedziałek"]];
-const AREAS = [
-  {k:"v", label:"Parter"}, {k:"n", label:"I piętro"}, {k:"e", label:"II piętro"}, {k:"k", label:"III piętro"}, {k:"s", label:"Garaż / teren"}
-];
-const $ = id => document.getElementById(id);
-const LS = "ekko-srodki-v1";
-let team = {}; try{ team = JSON.parse(localStorage.getItem("ekko-team")||"{}")||{}; }catch(e){}
-let st;
-function load(){ try{ st = JSON.parse(localStorage.getItem(LS)||"null"); }catch(e){ st=null; }
-  if(!st){ st={sample:true, stock:{}, cfg:{}, hist:[], who:"e"}; PRODUCTS.forEach(p=>st.stock[p.id]=p.sample); }
-  PRODUCTS.forEach(p=>{ if(st.stock[p.id]===undefined) st.stock[p.id]=st.sample?p.sample:0; }); }
-function save(){ try{ localStorage.setItem(LS, JSON.stringify(st)); }catch(e){} }
-function cfg(p){ return Object.assign({full:p.full, min:p.min}, st.cfg[p.id]||{}); }
-function plural(p,n){ const a=Math.abs(n)%100, b=a%10; if(n===1) return p.units[0]; if(b>=2&&b<=4&&!(a>=12&&a<=14)) return p.units[1]; return p.units[2]; }
+const ICONS={papier:"🧻",recznik:"🤲",clin:"🪟",swish:"🪑",proszek:"🧺",pisuar:"🚹",kwiatki:"🌸",worekodk:"🌀",drzwi:"🚪",worki20:"🗑️"};
+// Produkty startowe (tryb bez wspólnej bazy). Z bazą lista przychodzi z arkusza.
+const START=[["papier","Papier toaletowy, duże rolki","zgrzewka",15,4],["recznik","Ręczniki Katrin Zig Zag 2 (składane)","karton",10,3],["clin","Clin do szyb i luster, 500 ml","szt.",12,3],["swish","Swish Office Clean do mebli, 1 l","szt.",10,3],["proszek","Proszek do prania","opak.",4,1],["pisuar","Wkłady do pisuarów","szt.",20,6],["kwiatki","Żelowe kwiatki do WC","opak.",15,4],["worekodk","Worki do odkurzacza","szt.",20,5],["drzwi","Płyn do drzwi","butelka",8,2],["worki20","Worki na śmieci 20 l","rolka",30,8]];
+const PLURAL={"zgrzewka":["zgrzewka","zgrzewki","zgrzewek"],"karton":["karton","kartony","kartonów"],"butelka":["butelka","butelki","butelek"],"rolka":["rolka","rolki","rolek"]};
+const AREAS=[{k:"v",label:"Parter"},{k:"n",label:"I piętro"},{k:"e",label:"II piętro"},{k:"k",label:"III piętro"},{k:"s",label:"Garaż / teren"},{k:"m",label:"Kierownik obiektu"}];
+const WHEN=[["","Bez pośpiechu"],["dziś","Na dziś"],["jutro","Na jutro"],["poniedziałek","Na poniedziałek"]];
+const $=id=>document.getElementById(id);
+const B=window.EKKO_BAZA;
+let team={}; try{ team=JSON.parse(localStorage.getItem("ekko-team")||"{}")||{}; }catch(e){}
+let sign=""; try{ sign=(JSON.parse(localStorage.getItem("ekko-a33-v2")||"{}").signName)||""; }catch(e){}
+let pref={}; try{ pref=JSON.parse(localStorage.getItem("ekko-srodki-pref")||"{}")||{}; }catch(e){}
+function savePref(){ try{ localStorage.setItem("ekko-srodki-pref", JSON.stringify(pref)); }catch(e){} }
+
+// ---- dane: wspólna baza albo ten telefon (ten sam kształt) ----
+let D={produkty:[],zamowienia:[],ruchy:[]};
+const LS="ekko-srodki-v2";
+function nowStr(){ const d=new Date(), z=n=>String(n).padStart(2,"0"); return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())} ${z(d.getHours())}:${z(d.getMinutes())}`; }
+function localLoad(){ let s=null; try{ s=JSON.parse(localStorage.getItem(LS)||"null"); }catch(e){}
+  if(!s){ s={produkty:START.map(([id,nazwa,jednostka,pelny,min])=>({id,nazwa,jednostka,stan:0,pelny,min})),zamowienia:[],ruchy:[]};
+    try{ const old=JSON.parse(localStorage.getItem("ekko-srodki-v1")||"null"); if(old&&!old.sample) s.produkty.forEach(p=>{ if(old.stock&&old.stock[p.id]!=null) p.stan=old.stock[p.id]; }); }catch(e){} }
+  return s; }
+function localSave(){ try{ localStorage.setItem(LS, JSON.stringify(D)); }catch(e){} }
+function lchg(id,zm,opis){ const p=D.produkty.find(x=>x.id===id); if(!p) return; p.stan=Math.max(0,p.stan+zm); D.ruchy.unshift({data:nowStr(),produkt:p.nazwa,zmiana:zm,opis}); D.ruchy=D.ruchy.slice(0,60); }
+const LOCAL={
+  zamowienie(d){ D.zamowienia.unshift({id:String(Date.now()),data:nowStr(),kto:d.kto,pietro:d.pietro,na_kiedy:d.na_kiedy,pozycje:d.pozycje,uwagi:d.uwagi,status:"do wydania"}); },
+  wydane(d){ const z=D.zamowienia.find(x=>x.id===d.id); if(!z||z.status==="wydane") return; Object.keys(z.pozycje).forEach(id=>lchg(id,-z.pozycje[id],"Wydano: "+z.pietro)); z.status="wydane"; z.wydal=d.kto; z.data_wydania=nowStr(); },
+  dostawa(d){ Object.keys(d.pozycje).forEach(id=>lchg(id,d.pozycje[id],"Dostawa")); },
+  ustawStan(d){ const p=D.produkty.find(x=>x.id===d.id); if(!p) return; const zm=d.stan-p.stan; p.stan=d.stan; p.pelny=d.pelny; p.min=d.min; if(zm) D.ruchy.unshift({data:nowStr(),produkt:p.nazwa,zmiana:zm,opis:"Korekta stanu"}); }
+};
+async function act(a,data){
+  if(B.on){ busy(true); try{ D=await B.post(a,data); } catch(e){ toast("Brak połączenia z bazą. Spróbuj jeszcze raz."); busy(false); throw e; } busy(false); }
+  else { LOCAL[a](data); localSave(); }
+  renderAll();
+}
+async function refresh(){ if(!B.on) return; try{ D=await B.get(); renderAll(); }catch(e){ $("mode").textContent="🔴 Nie mogę połączyć się z bazą. Sprawdź internet."; } }
+function busy(b){ document.body.style.cursor=b?"progress":""; document.querySelectorAll("button").forEach(x=>x.disabled=b); }
+
+// ---- pomocnicze ----
+function plural(p,n){ const f=PLURAL[p.jednostka]; if(!f) return p.jednostka; const a=Math.abs(n)%100,b=a%10; if(n===1) return f[0]; if(b>=2&&b<=4&&!(a>=12&&a<=14)) return f[1]; return f[2]; }
 function q(p,n){ return n+" "+plural(p,n); }
-function whoName(k){ const a=AREAS.find(x=>x.k===k); const n=(team[k]&&team[k].name)||""; return n ? `${n} (${a.label})` : a.label; }
-function nowStr(){ const d=new Date(); return d.toLocaleDateString("pl-PL",{day:"2-digit",month:"2-digit"})+" "+d.toLocaleTimeString("pl-PL",{hour:"2-digit",minute:"2-digit"}); }
-let order = {};
+function areaLabel(k){ return (AREAS.find(a=>a.k===k)||AREAS[0]).label; }
+function personName(k){ if(k==="m") return sign?("Kierownik obiektu "+sign):"Kierownik obiektu"; return (team[k]&&team[k].name)||""; }
+function whoOption(k){ const n=personName(k); return k==="m"?(n):(n?`${n} (${areaLabel(k)})`:areaLabel(k)); }
+function shortDate(s){ const m=String(s).match(/(\d{4})-(\d\d)-(\d\d)[ T](\d\d):(\d\d)/); return m?`${m[3]}.${m[2]} ${m[4]}:${m[5]}`:s; }
+let order={};
+
+function orderText(){
+  const k=$("who").value, name=personName(k), w=$("when").value;
+  const h=new Date().getHours(), hello=h<18?"Dzień dobry 🌸":"Dobry wieczór 🌸";
+  const L=["🧴 *Zamówienie – "+areaLabel(k)+"*",hello,"Panie Sylwestrze, proszę"+(w?" na "+w:"")+" o:"];
+  const items=D.produkty.filter(p=>order[p.id]);
+  if(!items.length) L.push("_(wybierz produkty)_");
+  items.forEach(p=>L.push("• "+p.nazwa+" – "+q(p,order[p.id])));
+  const note=$("orderNote").value.trim(); if(note){ L.push(""); L.push("📝 "+note); }
+  L.push(""); L.push("Dziękuję"+(name&&k!=="m"?", "+name:"")+" 😊");
+  return L.join("\n");
+}
+function itemsText(poz){ return Object.keys(poz).map(id=>{ const p=D.produkty.find(x=>x.id===id); return p?`${p.nazwa} – ${q(p,poz[id])}`:id+" – "+poz[id]; }).join("<br>"); }
 
 function renderOrder(){
-  $("who").innerHTML = AREAS.map(a=>`<option value="${a.k}">${whoName(a.k)}</option>`).join("");
-  $("who").value = st.who||"e";
   $("orderList").innerHTML="";
-  PRODUCTS.forEach(p=>{
-    const n=order[p.id]||0;
-    const d=document.createElement("div"); d.className="prod"+(n?" picked":"");
-    d.innerHTML=`<div class="ic" aria-hidden="true">${p.ic}</div><div><b>${p.name}</b><small>${p.unit}</small></div>
-      <div class="qty"><button type="button" aria-label="Mniej">−</button><output>${n}</output><button type="button" aria-label="Więcej">+</button></div>`;
-    const [minus,plus]=d.querySelectorAll("button");
-    minus.onclick=()=>{ order[p.id]=Math.max(0,(order[p.id]||0)-1); renderOrder(); };
-    plus.onclick=()=>{ order[p.id]=(order[p.id]||0)+1; renderOrder(); };
-    $("orderList").appendChild(d);
-  });
-  const txt=orderText();
-  $("orderMsg").textContent=txt;
-  $("orderWa").href="https://wa.me/?text="+encodeURIComponent(txt);
-  const any=PRODUCTS.some(p=>order[p.id]);
-  $("orderIssue").disabled=!any; $("orderWa").style.opacity=any?1:.5;
+  D.produkty.forEach(p=>{ const n=order[p.id]||0; const d=document.createElement("div"); d.className="prod"+(n?" picked":"");
+    d.innerHTML=`<div class="ic" aria-hidden="true">${ICONS[p.id]||"🧴"}</div><div><b>${p.nazwa}</b><small>${p.jednostka}</small></div><div class="qty"><button type="button" aria-label="Mniej">−</button><output>${n}</output><button type="button" aria-label="Więcej">+</button></div>`;
+    const [mi,pl]=d.querySelectorAll("button"); mi.onclick=()=>{ order[p.id]=Math.max(0,(order[p.id]||0)-1); renderOrder(); }; pl.onclick=()=>{ order[p.id]=(order[p.id]||0)+1; renderOrder(); };
+    $("orderList").appendChild(d); });
+  $("orderMsg").textContent=orderText();
+  $("orderSend").disabled=!D.produkty.some(p=>order[p.id]);
 }
-function orderText(){
-  const k=$("who").value||st.who||"e", a=AREAS.find(x=>x.k===k), name=(team[k]&&team[k].name)||"";
-  const w=$("when").value;
-  const h=new Date().getHours(), hello = h<18 ? "Dzień dobry 🌸" : "Dobry wieczór 🌸";
-  const L=["🧴 *Zamówienie – "+a.label+"*", hello, "Panie Sylwestrze, proszę"+(w?" na "+w:"")+" o:"];
-  const items=PRODUCTS.filter(p=>order[p.id]);
-  if(!items.length) L.push("_(wybierz produkty)_");
-  items.forEach(p=>L.push("• "+p.name+" – "+q(p,order[p.id])));
-  const note=$("orderNote").value.trim(); if(note){ L.push(""); L.push("📝 "+note); }
-  L.push(""); L.push("Dziękuję"+(name?", "+name:"")+" 😊");
-  return L.join("\n");
+function renderIssue(){
+  const open=D.zamowienia.filter(z=>z.status!=="wydane"); $("issueCnt").textContent=open.length?`(${open.length})`:"";
+  $("issueList").innerHTML=open.length?"":`<p class="hint" style="padding:0 16px">Nic do wydania. 👍</p>`;
+  open.forEach(z=>{ const d=document.createElement("div"); d.className="prod order";
+    d.innerHTML=`<div class="ic" aria-hidden="true">📦</div><div><b>${z.pietro}${z.na_kiedy?" · na "+z.na_kiedy:""}</b><small>${shortDate(z.data)}${z.kto?" · "+z.kto:""}</small><div class="desc">${itemsText(z.pozycje)}</div>${z.uwagi?`<div class="desc">📝 ${String(z.uwagi).replace(/[<&]/g,c=>c==="<"?"&lt;":"&amp;")}</div>`:""}</div><button class="btn small primary" type="button">Wydane</button>`;
+    d.querySelector("button").onclick=()=>act("wydane",{id:z.id,kto:personName($("who").value)||areaLabel($("who").value)}).then(()=>toast("Wydane, stan zmniejszony")).catch(()=>{});
+    $("issueList").appendChild(d); });
+  const done=D.zamowienia.filter(z=>z.status==="wydane").slice(0,8);
+  $("issuedList").innerHTML=done.map(z=>`<div><span>${shortDate(z.data_wydania||z.data)} · ${z.pietro}</span><span>✅</span></div>`).join("")||`<p class="hint">Jeszcze nic.</p>`;
 }
-
 function renderStock(){
-  $("sampleNote").hidden=!st.sample;
   $("stockList").innerHTML="";
-  PRODUCTS.forEach(p=>{
-    const c=cfg(p), n=st.stock[p.id]||0;
-    const cls = n<=0 ? "out" : n<c.min ? "low" : "ok";
-    const lab = n<=0 ? "brak" : n<c.min ? "kończy się" : "w porządku";
+  D.produkty.forEach(p=>{ const n=p.stan; const cls=n<=0?"out":n<p.min?"low":"ok", lab=n<=0?"brak":n<p.min?"kończy się":"w porządku";
     const d=document.createElement("div"); d.className="prod";
-    d.innerHTML=`<div class="ic" aria-hidden="true">${p.ic}</div><div><b>${p.name}</b><span class="pill ${cls}">${lab}</span></div>
-      <div class="stock">${n}<small>${plural(p,n)}</small></div>
-      <div class="edit" hidden>
-        <label class="f">Stan teraz<input type="number" inputmode="numeric" min="0" data-f="now" value="${n}"></label>
-        <label class="f">Pełny stan<input type="number" inputmode="numeric" min="0" data-f="full" value="${c.full}"></label>
-        <label class="f">Ostrzeż poniżej<input type="number" inputmode="numeric" min="0" data-f="min" value="${c.min}"></label>
-        <button class="btn small accent" type="button" style="grid-column:1/-1">Zapisz</button>
-      </div>`;
-    const ed=d.querySelector(".edit");
-    d.querySelector("b").parentElement.style.cursor="pointer";
-    d.querySelector("b").parentElement.onclick=()=>{ ed.hidden=!ed.hidden; };
-    d.querySelector(".stock").onclick=()=>{ ed.hidden=!ed.hidden; };
-    ed.querySelector("button").onclick=()=>{
-      const v=f=>Math.max(0,parseInt(ed.querySelector(`[data-f=${f}]`).value||"0",10)||0);
-      const now=v("now"); if(now!==n) st.hist.unshift({t:nowStr(), txt:`Korekta: ${p.name}`, d:now-n, u:p.id});
-      st.stock[p.id]=now; st.cfg[p.id]={full:v("full"), min:v("min")}; st.sample=false; save(); renderAll(); toast("Zapisano");
-    };
-    $("stockList").appendChild(d);
-  });
-  $("hist").innerHTML = st.hist.slice(0,12).map(h=>{ const p=PRODUCTS.find(x=>x.id===h.u); return `<div><span>${h.t} · ${h.txt}</span><span>${h.d>0?"+":""}${h.d} ${p?plural(p,Math.abs(h.d)):""}</span></div>`; }).join("") || `<p class="hint">Brak ruchów. Wydania z zakładki „Zamówienie” pojawią się tutaj.</p>`;
+    d.innerHTML=`<div class="ic" aria-hidden="true">${ICONS[p.id]||"🧴"}</div><div><b>${p.nazwa}</b><span class="pill ${cls}">${lab}</span></div><div class="stock">${n}<small>${plural(p,n)}</small></div>
+      <div class="edit" hidden><label class="f">Stan teraz<input type="number" inputmode="numeric" min="0" data-f="stan" value="${n}"></label><label class="f">Pełny stan<input type="number" inputmode="numeric" min="0" data-f="pelny" value="${p.pelny}"></label><label class="f">Ostrzeż poniżej<input type="number" inputmode="numeric" min="0" data-f="min" value="${p.min}"></label><button class="btn small accent" type="button" style="grid-column:1/-1">Zapisz</button></div>`;
+    const ed=d.querySelector(".edit"); const tog=()=>{ ed.hidden=!ed.hidden; }; d.children[1].onclick=tog; d.children[2].onclick=tog; d.children[1].style.cursor="pointer";
+    ed.querySelector("button").onclick=()=>{ const v=f=>Math.max(0,parseInt(ed.querySelector(`[data-f=${f}]`).value||"0",10)||0); act("ustawStan",{id:p.id,stan:v("stan"),pelny:v("pelny"),min:v("min")}).then(()=>toast("Zapisano")).catch(()=>{}); };
+    $("stockList").appendChild(d); });
+  $("hist").innerHTML=D.ruchy.slice(0,15).map(r=>`<div><span>${shortDate(r.data)} · ${r.opis}: ${r.produkt}</span><span>${r.zmiana>0?"+":""}${r.zmiana}</span></div>`).join("")||`<p class="hint">Brak ruchów.</p>`;
 }
-
-function monthList(){ return PRODUCTS.map(p=>({p, n:Math.max(0, cfg(p).full-(st.stock[p.id]||0))})).filter(x=>x.n>0); }
-function monthText(){
-  const d=new Date(), m=d.toLocaleDateString("pl-PL",{month:"long",year:"numeric"});
-  const L=["📦 *ŚRODKI CZYSTOŚCI DO ZAMÓWIENIA*","🏢 A33 · "+m,""];
-  const list=monthList();
-  if(!list.length) L.push("Magazynek pełny, nic nie trzeba zamawiać. ✅");
-  list.forEach(x=>L.push("• "+x.p.name+" – "+q(x.p,x.n)+"  (jest: "+(st.stock[x.p.id]||0)+")"));
-  L.push(""); L.push("Kierownik obiektu"+((localStorage.getItem("ekko-a33-v2")&&(()=>{try{const s=JSON.parse(localStorage.getItem("ekko-a33-v2"));return s.signName?" "+s.signName:"";}catch(e){return "";}})())||""));
-  return L.join("\n");
-}
+function monthList(){ return D.produkty.map(p=>({p,n:Math.max(0,p.pelny-p.stan)})).filter(x=>x.n>0); }
+function monthText(){ const m=new Date().toLocaleDateString("pl-PL",{month:"long",year:"numeric"}); const L=["📦 *ŚRODKI CZYSTOŚCI DO ZAMÓWIENIA*","🏢 A33 · "+m,""]; const l=monthList();
+  if(!l.length) L.push("Magazynek pełny, nic nie trzeba zamawiać. ✅"); l.forEach(x=>L.push("• "+x.p.nazwa+" – "+q(x.p,x.n)+"  (jest: "+x.p.stan+")")); L.push(""); L.push("Kierownik obiektu"+(sign?" "+sign:"")); return L.join("\n"); }
 function renderMonth(){ const t=monthText(); $("monthMsg").textContent=t; $("monthWa").href="https://wa.me/?text="+encodeURIComponent(t); }
-
-function renderAll(){ renderOrder(); renderStock(); renderMonth(); }
+function renderAll(){ renderOrder(); renderIssue(); renderStock(); renderMonth();
+  $("mode").textContent = B.on ? "🟢 Wspólna baza: wszyscy widzą te same zamówienia i stan magazynku." : "⚪ Tylko ten telefon. Kierownik może podłączyć wspólną bazę."; }
 let tt; function toast(m){ const t=$("toast"); t.textContent=m; t.hidden=false; clearTimeout(tt); tt=setTimeout(()=>t.hidden=true,2400); }
 
-document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{
-  document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected", x===b));
-  ["order","stock","month"].forEach(t=>$("t-"+t).hidden = t!==b.dataset.t);
-  renderAll();
-});
-$("who").onchange=e=>{ st.who=e.target.value; save(); renderOrder(); };
-$("orderNote").oninput=renderOrder;
-$("when").innerHTML=WHEN.map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
-$("when").value="jutro";
-$("when").onchange=renderOrder;
-$("orderIssue").onclick=()=>{
-  const who=whoName($("who").value);
-  PRODUCTS.forEach(p=>{ const n=order[p.id]; if(n){ st.stock[p.id]=Math.max(0,(st.stock[p.id]||0)-n); st.hist.unshift({t:nowStr(), txt:`Wydano: ${who}`, d:-n, u:p.id}); } });
-  st.hist=st.hist.slice(0,100); order={}; $("orderNote").value=""; save(); renderAll(); toast("Odjęto ze stanu magazynku");
+// ---- zdarzenia ----
+$("who").innerHTML=AREAS.map(a=>`<option value="${a.k}">${whoOption(a.k)}</option>`).join(""); $("who").value=pref.who||"m";
+$("who").onchange=()=>{ pref.who=$("who").value; savePref(); renderOrder(); };
+$("when").innerHTML=WHEN.map(([v,l])=>`<option value="${v}">${l}</option>`).join(""); $("when").value="jutro";
+$("when").onchange=renderOrder; $("orderNote").oninput=renderOrder;
+$("orderSend").onclick=async()=>{
+  const txt=orderText(), k=$("who").value, poz={}; D.produkty.forEach(p=>{ if(order[p.id]) poz[p.id]=order[p.id]; });
+  try{ await act("zamowienie",{kto:personName(k),pietro:areaLabel(k),na_kiedy:$("when").value,pozycje:poz,uwagi:$("orderNote").value.trim()}); }catch(e){ return; }
+  order={}; $("orderNote").value=""; renderOrder(); toast("Zapisane. Otwieram WhatsApp…");
+  location.href="https://wa.me/?text="+encodeURIComponent(txt);
 };
 $("monthCopy").onclick=async()=>{ try{ await navigator.clipboard.writeText(monthText()); toast("Skopiowano listę"); }catch(e){ toast("Zaznacz tekst i skopiuj ręcznie"); } };
-$("delivery").onclick=()=>{ const list=monthList(); if(!list.length){ toast("Nic do dodania"); return; }
-  list.forEach(x=>{ st.stock[x.p.id]=(st.stock[x.p.id]||0)+x.n; st.hist.unshift({t:nowStr(), txt:"Dostawa", d:x.n, u:x.p.id}); });
-  st.sample=false; save(); renderAll(); toast("Dodano dostawę do stanu"); };
-
-load(); renderAll();
+$("delivery").onclick=()=>{ const l=monthList(); if(!l.length){ toast("Nic do dodania"); return; } const poz={}; l.forEach(x=>poz[x.p.id]=x.n); act("dostawa",{pozycje:poz}).then(()=>toast("Dodano dostawę do stanu")).catch(()=>{}); };
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{ document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b)); ["order","issue","stock","month"].forEach(t=>$("t-"+t).hidden=t!==b.dataset.t); pref.tab=b.dataset.t; savePref(); refresh(); });
+if(pref.tab){ const b=document.querySelector(`.tabs button[data-t="${pref.tab}"]`); if(b){ document.querySelectorAll(".tabs button").forEach(x=>x.setAttribute("aria-selected",x===b)); ["order","issue","stock","month"].forEach(t=>$("t-"+t).hidden=t!==pref.tab); } }
+D = B.on ? {produkty:START.map(([id,nazwa,jednostka,pelny,min])=>({id,nazwa,jednostka,stan:0,pelny,min})),zamowienia:[],ruchy:[]} : localLoad();
+renderAll(); if(B.on){ $("mode").textContent="⏳ Łączę ze wspólną bazą…"; refresh(); }
+if(B.justConnected) toast("Połączono ze wspólną bazą");
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible") refresh(); });
 if("serviceWorker" in navigator && location.protocol==="https:"){ navigator.serviceWorker.register("sw.js").catch(()=>{}); }
 </script>
 </body>
