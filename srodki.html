@@ -94,6 +94,9 @@ pre.msg{white-space:pre-wrap;word-break:break-word;font-family:var(--f-body);fon
       <select id="who"></select>
     </label>
     <div class="list" id="orderList"></div>
+    <label class="f">Na kiedy
+      <select id="when"></select>
+    </label>
     <label class="f">Uwagi (opcjonalnie)<textarea id="orderNote" placeholder="np. potrzebne na jutro rano"></textarea></label>
     <pre class="msg" id="orderMsg"></pre>
     <div class="actions">
@@ -135,8 +138,14 @@ const PRODUCTS = [
   {id:"recznik", ic:"🤲", name:"Ręczniki Katrin Zig Zag 2 (składane)", unit:"karton", units:["karton","kartony","kartonów"], full:10, min:3, sample:6},
   {id:"clin", ic:"🪟", name:"Clin do szyb i luster, 500 ml", unit:"szt.", units:["szt.","szt.","szt."], full:12, min:3, sample:8},
   {id:"swish", ic:"🪑", name:"Swish Office Clean do mebli, 1 l", unit:"szt.", units:["szt.","szt.","szt."], full:10, min:3, sample:2},
-  {id:"proszek", ic:"🧺", name:"Proszek do prania", unit:"opak.", units:["opak.","opak.","opak."], full:4, min:1, sample:0}
+  {id:"proszek", ic:"🧺", name:"Proszek do prania", unit:"opak.", units:["opak.","opak.","opak."], full:4, min:1, sample:0},
+  {id:"pisuar", ic:"🚹", name:"Wkłady do pisuarów", unit:"szt.", units:["szt.","szt.","szt."], full:20, min:6, sample:10},
+  {id:"kwiatki", ic:"🌸", name:"Żelowe kwiatki do WC", unit:"opak.", units:["opak.","opak.","opak."], full:15, min:4, sample:5},
+  {id:"worekodk", ic:"🌀", name:"Worki do odkurzacza", unit:"szt.", units:["szt.","szt.","szt."], full:20, min:5, sample:12},
+  {id:"drzwi", ic:"🚪", name:"Płyn do drzwi", unit:"butelka", units:["butelka","butelki","butelek"], full:8, min:2, sample:3},
+  {id:"worki20", ic:"🗑️", name:"Worki na śmieci 20 l", unit:"rolka", units:["rolka","rolki","rolek"], full:30, min:8, sample:14}
 ];
+const WHEN = [["","Bez pośpiechu"],["dziś","Na dziś"],["jutro","Na jutro"],["poniedziałek","Na poniedziałek"]];
 const AREAS = [
   {k:"v", label:"Parter"}, {k:"n", label:"I piętro"}, {k:"e", label:"II piętro"}, {k:"k", label:"III piętro"}, {k:"s", label:"Garaż / teren"}
 ];
@@ -145,7 +154,8 @@ const LS = "ekko-srodki-v1";
 let team = {}; try{ team = JSON.parse(localStorage.getItem("ekko-team")||"{}")||{}; }catch(e){}
 let st;
 function load(){ try{ st = JSON.parse(localStorage.getItem(LS)||"null"); }catch(e){ st=null; }
-  if(!st){ st={sample:true, stock:{}, cfg:{}, hist:[], who:"e"}; PRODUCTS.forEach(p=>st.stock[p.id]=p.sample); } }
+  if(!st){ st={sample:true, stock:{}, cfg:{}, hist:[], who:"e"}; PRODUCTS.forEach(p=>st.stock[p.id]=p.sample); }
+  PRODUCTS.forEach(p=>{ if(st.stock[p.id]===undefined) st.stock[p.id]=st.sample?p.sample:0; }); }
 function save(){ try{ localStorage.setItem(LS, JSON.stringify(st)); }catch(e){} }
 function cfg(p){ return Object.assign({full:p.full, min:p.min}, st.cfg[p.id]||{}); }
 function plural(p,n){ const a=Math.abs(n)%100, b=a%10; if(n===1) return p.units[0]; if(b>=2&&b<=4&&!(a>=12&&a<=14)) return p.units[1]; return p.units[2]; }
@@ -176,12 +186,14 @@ function renderOrder(){
 }
 function orderText(){
   const k=$("who").value||st.who||"e", a=AREAS.find(x=>x.k===k), name=(team[k]&&team[k].name)||"";
-  const L=["🧴 *Zamówienie – "+a.label+"*", "Panie Sylwestrze, proszę o:"];
+  const w=$("when").value;
+  const h=new Date().getHours(), hello = h<18 ? "Dzień dobry 🌸" : "Dobry wieczór 🌸";
+  const L=["🧴 *Zamówienie – "+a.label+"*", hello, "Panie Sylwestrze, proszę"+(w?" na "+w:"")+" o:"];
   const items=PRODUCTS.filter(p=>order[p.id]);
   if(!items.length) L.push("_(wybierz produkty)_");
   items.forEach(p=>L.push("• "+p.name+" – "+q(p,order[p.id])));
   const note=$("orderNote").value.trim(); if(note){ L.push(""); L.push("📝 "+note); }
-  L.push(""); L.push("Dziękuję"+(name?", "+name:"")+"!");
+  L.push(""); L.push("Dziękuję"+(name?", "+name:"")+" 😊");
   return L.join("\n");
 }
 
@@ -237,6 +249,9 @@ document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{
 });
 $("who").onchange=e=>{ st.who=e.target.value; save(); renderOrder(); };
 $("orderNote").oninput=renderOrder;
+$("when").innerHTML=WHEN.map(([v,l])=>`<option value="${v}">${l}</option>`).join("");
+$("when").value="jutro";
+$("when").onchange=renderOrder;
 $("orderIssue").onclick=()=>{
   const who=whoName($("who").value);
   PRODUCTS.forEach(p=>{ const n=order[p.id]; if(n){ st.stock[p.id]=Math.max(0,(st.stock[p.id]||0)-n); st.hist.unshift({t:nowStr(), txt:`Wydano: ${who}`, d:-n, u:p.id}); } });
